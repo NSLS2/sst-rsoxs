@@ -263,7 +263,7 @@ def snapsaxs(line):
 
 del snapsaxs
 
-
+    
 @register_line_magic
 def snapwaxs(line):
     try:
