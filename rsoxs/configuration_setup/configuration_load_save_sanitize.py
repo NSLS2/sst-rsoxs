@@ -93,13 +93,9 @@ def sanitizeSpreadsheet(df):
         "group_name",
         "uid_local",
         "notes",
-        "proposal_id",
         "bar_spot",
         "notes",
         "bar_name",
-        "analysis_dir",
-        "data_session",
-        "SAF",
     ]
 
     # Process each column
@@ -128,7 +124,6 @@ sampleParameters_Empty = {
     "sample_name": None,  ## TODO: Would like to eliminate and consolidate with sample_id
     "project_name": None,
     "institution": None,
-    "proposal_id": None,
     "bar_spot": None,
     "front": None,
     "grazing": None,
@@ -145,7 +140,6 @@ samplesParameters_Required = [
     "sample_name",
     "project_name",
     "institution",
-    "proposal_id",
     "bar_spot",
     "front",
     "grazing",
@@ -167,7 +161,6 @@ samplesParameters_Booleans = [
     "grazing",
 ]
 samplesParameters_Ints = [
-    "proposal_id",
     "sample_priority",
 ]
 
