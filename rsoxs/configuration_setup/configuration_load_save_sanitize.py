@@ -14,7 +14,7 @@ import uuid
 from ..plans.default_energy_parameters import energyListParameters
 
 
-CURRENT_CYCLE = '2025-2' ## Currently, this needs to be changed manually at the beginning of each cycle.
+CURRENT_CYCLE = '2025-2' ## Currently, this needs to be changed manually at the beginning of each cycle. ##
 
 
 def load_configuration_spreadsheet_local(file_path):
