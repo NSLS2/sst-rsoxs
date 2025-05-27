@@ -28,7 +28,7 @@ from ..HW.detectors import (
     exposure,
 )
 from nbs_bl.plans.scans import nbs_count
-from ..Functions.alignment import sample
+#from ..Functions.alignment import sample
 from ..startup import RE
 from ..HW.energy import set_polarization
 from nbs_bl.printing import run_report, boxed_text
@@ -330,7 +330,7 @@ ip.prompts = RSoXSPrompt(ip)
 """
 
 def beamline_status():
-    sample()
+    #sample()
     boxed_text(
         "Detector status",
         exposure()
