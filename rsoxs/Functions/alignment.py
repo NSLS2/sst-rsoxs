@@ -58,7 +58,7 @@ from .alignment_local import *
 
 run_report(__file__)
 
-
+"""
 def sample():
     title = "Sample metadata - stored in every scan:"
     text = ""
@@ -119,7 +119,7 @@ def sample():
     if len(str(RE.md["notes"])) > 0:
         text += "\n   Notes:                 " + colored("{}".format(RE.md["notes"]).center(48, " "), "cyan")
     boxed_text(title, text, "red", 80, shrink=False)
-
+"""
 
 def get_location(motor_list):
     locs = []
