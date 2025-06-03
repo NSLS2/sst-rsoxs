@@ -104,6 +104,17 @@ default_configurations = {
         {"motor": slits2.hsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
         {"motor": slits3.vsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
         {"motor": slits3.hsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
+
+        {"motor": shutter_y, "position": 44, "order": 1},
+        {"motor": izero_y, "position": 144, "order": 1},
+        {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
+        {"motor": BeamStopW, "position": 3, "order": 1},
+        {"motor": BeamStopS, "position": 3, "order": 1},
+        {"motor": sam_Y, "position": 345, "order": 1}, ## TODO: Might need to remove if issue with gate valve closed.  maybe make separate configuration, solid_sample_out
+        {"motor": sam_X, "position": 0, "order": 1},
+        {"motor": sam_Z, "position": 0, "order": 1},
+        {"motor": sam_Th, "position": 0, "order": 1},
+        {"motor": TEMZ, "position": 1, "order": 1},
     ],
 
 
@@ -277,49 +288,10 @@ default_configurations = {
 ## TODO: break up the function so that undulator movements are separated.  We lose PV write access during maintenance/shutdown periods.
 def all_out():
     yield from psh10.close()
-    print("Retracting Slits to 1 cm gap")
+    yield from load_configuration("NoBeam")
     yield from bps.mv(
-        slits1.vsize,
-        10,
-        slits1.hsize,
-        10,
-        slits2.vsize,
-        10,
-        slits2.hsize,
-        10,
-        slits3.vsize,
-        10,
-        slits3.hsize,
-        10,
-    )
-    print("Moving the rest of RSoXS components")
-    yield from bps.mv(
-        shutter_y,
-        44,
-        izero_y,
-        144,
-        Det_W,
-        position_CameraWAXS_OutOfBeamPath,
-        BeamStopW,
-        3,
-        BeamStopS,
-        3,
-        sam_Y,
-        345,
-        sam_X,
-        0,
-        sam_Z,
-        0,
-        sam_Th,
-        0,
-        en.polarization, #TODO - remove this to another step with try except for PV access error
-        0,
         slitsc,
         -0.05,
-        TEMZ,
-        1
-        #dm7, ## PK 20240625 - commenting out because it throws an error while running nmode #TODO - check with cherno about moving mirror 4 back as well
-        #80 ## PK 20240528: Changed from -80 to 80 because while running nmode, I got LimitError.  I think the negative sign is a typo and DM7 is supposed to move up to get out of the way.
     )
     print("moving back to 1200 l/mm grating")
     yield from grating_to_1200()
@@ -327,6 +299,7 @@ def all_out():
     yield from bps.mv(mono_en.cff, 2)
     print("moving to 270 eV")
     yield from bps.mv(en, 270)
+    yield from bps.mv(en.polarization, 0)
     RE.md.update(
         {
             "RSoXS_Config": "inactive",
