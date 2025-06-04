@@ -119,17 +119,17 @@ default_configurations = {
 
 
     "MirrorConfiguration_RSoXS": [
-        {"motor": mir1.x, "position": 1, "order": 0},
+        {"motor": mir1.x, "position": 1.3, "order": 0},
         {"motor": mir1.y, "position": -18, "order": 1},
         {"motor": mir1.z, "position": 0, "order": 2},
-        {"motor": mir1.pitch, "position": 0.5, "order": 3},
+        {"motor": mir1.pitch, "position": 0.57, "order": 3},
         {"motor": mir1.roll, "position": 0, "order": 4},
         {"motor": mir1.yaw, "position": 0, "order": 5},
 
-        {"motor": mir3.x, "position": 24.05, "order": 0},
+        {"motor": mir3.x, "position": 24.2, "order": 0},
         {"motor": mir3.y, "position": 18, "order": 1},
         {"motor": mir3.z, "position": 0, "order": 2},
-        {"motor": mir3.pitch, "position": 7.78, "order": 3},
+        {"motor": mir3.pitch, "position": 7.8, "order": 3},
         {"motor": mir3.roll, "position": 0, "order": 4},
         {"motor": mir3.yaw, "position": 0, "order": 5},
     ],
