@@ -244,7 +244,7 @@ def get_sample_dict(acq=[], locations=None):
     sample_set = RE.md["sample_set"]
     sample_date = RE.md["sample_date"]
     project_name = RE.md["project_name"]
-    #proposal_id = RE.md["proposal_id"]
+    proposal_id = RE.md["proposal_id"]
     #saf_id = RE.md["SAF"]
     institution = RE.md["institution"]
     project_desc = RE.md["project_desc"]
@@ -266,7 +266,7 @@ def get_sample_dict(acq=[], locations=None):
         "sample_desc": sample_desc,
         "sample_id": sample_id,
         "sample_priority": sample_priority,
-        #"proposal_id": proposal_id,
+        "proposal_id": proposal_id,
         #"SAF": saf_id,
         "institution": institution,
         "sample_set": sample_set,
