@@ -53,7 +53,7 @@ def load_configuration(configuration_name):
         mdToUpdate = {
             "RSoXS_Config": configuration_name,
             "RSoXS_Main_DET": "WAXS",
-            "RSoXS_WAXS_SDD": 39.19,
+            "RSoXS_WAXS_SDD": 34.34, #"RSoXS_WAXS_SDD": 39.19,
             "RSoXS_WAXS_BCX": 467.5,
             "RSoXS_WAXS_BCY": 513.4,
             "WAXS_Mask": [(367, 545), (406, 578), (880, 0), (810, 0)],
