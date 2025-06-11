@@ -15,7 +15,7 @@ class RSoXSBar(AbsoluteBar):
         for sample_dict in configuration:
             sample_id = sample_dict.pop("sample_id")
             sample_dict["name"] = sample_dict.get("sample_name", "")
-            location = sample_dict.pop("location")
+            location = sample_dict.get("location")
             coordinates = []
             for key in ["x", "y", "z", "th"]:
                 for loc in location:

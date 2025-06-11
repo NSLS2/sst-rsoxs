@@ -53,7 +53,7 @@ def load_configuration(configuration_name):
         mdToUpdate = {
             "RSoXS_Config": configuration_name,
             "RSoXS_Main_DET": "WAXS",
-            "RSoXS_WAXS_SDD": 39.19,
+            "RSoXS_WAXS_SDD": 34.34, #"RSoXS_WAXS_SDD": 39.19,
             "RSoXS_WAXS_BCX": 467.5,
             "RSoXS_WAXS_BCY": 513.4,
             "WAXS_Mask": [(367, 545), (406, 578), (880, 0), (810, 0)],
@@ -104,21 +104,32 @@ default_configurations = {
         {"motor": slits2.hsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
         {"motor": slits3.vsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
         {"motor": slits3.hsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
+
+        {"motor": shutter_y, "position": 44, "order": 1},
+        {"motor": izero_y, "position": 144, "order": 1},
+        {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
+        {"motor": BeamStopW, "position": 3, "order": 1},
+        {"motor": BeamStopS, "position": 3, "order": 1},
+        {"motor": sam_Y, "position": 345, "order": 1}, ## TODO: Might need to remove if issue with gate valve closed.  maybe make separate configuration, solid_sample_out
+        {"motor": sam_X, "position": 0, "order": 1},
+        {"motor": sam_Z, "position": 0, "order": 1},
+        {"motor": sam_Th, "position": 0, "order": 1},
+        {"motor": TEMZ, "position": 1, "order": 1},
     ],
 
 
     "MirrorConfiguration_RSoXS": [
-        {"motor": mir1.x, "position": 1, "order": 0},
+        {"motor": mir1.x, "position": 1.3, "order": 0},
         {"motor": mir1.y, "position": -18, "order": 1},
         {"motor": mir1.z, "position": 0, "order": 2},
-        {"motor": mir1.pitch, "position": 0.5, "order": 3},
+        {"motor": mir1.pitch, "position": 0.57, "order": 3},
         {"motor": mir1.roll, "position": 0, "order": 4},
         {"motor": mir1.yaw, "position": 0, "order": 5},
 
-        {"motor": mir3.x, "position": 24.05, "order": 0},
+        {"motor": mir3.x, "position": 24.2, "order": 0},
         {"motor": mir3.y, "position": 18, "order": 1},
         {"motor": mir3.z, "position": 0, "order": 2},
-        {"motor": mir3.pitch, "position": 7.78, "order": 3},
+        {"motor": mir3.pitch, "position": 7.8, "order": 3},
         {"motor": mir3.roll, "position": 0, "order": 4},
         {"motor": mir3.yaw, "position": 0, "order": 5},
     ],
@@ -140,7 +151,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": position_RSoXSSlitAperture_FullyOpen, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": BeamStopW, "position": position_BeamstopWAXS_InBeamPath, "order": 1},
         {"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
     ],
@@ -158,7 +169,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 1, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
@@ -179,7 +190,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 1, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
@@ -200,7 +211,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 1, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
@@ -222,7 +233,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 1, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
@@ -243,7 +254,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 5, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 5, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
@@ -264,7 +275,7 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 5, "order": 0},
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hsize, "position": 5, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.15, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
         {"motor": shutter_y, "position": 2.2, "order": 0},
         {"motor": izero_y, "position": -31, "order": 0},
         {"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
@@ -277,49 +288,10 @@ default_configurations = {
 ## TODO: break up the function so that undulator movements are separated.  We lose PV write access during maintenance/shutdown periods.
 def all_out():
     yield from psh10.close()
-    print("Retracting Slits to 1 cm gap")
+    yield from load_configuration("NoBeam")
     yield from bps.mv(
-        slits1.vsize,
-        10,
-        slits1.hsize,
-        10,
-        slits2.vsize,
-        10,
-        slits2.hsize,
-        10,
-        slits3.vsize,
-        10,
-        slits3.hsize,
-        10,
-    )
-    print("Moving the rest of RSoXS components")
-    yield from bps.mv(
-        shutter_y,
-        44,
-        izero_y,
-        144,
-        Det_W,
-        position_CameraWAXS_OutOfBeamPath,
-        BeamStopW,
-        3,
-        BeamStopS,
-        3,
-        sam_Y,
-        345,
-        sam_X,
-        0,
-        sam_Z,
-        0,
-        sam_Th,
-        0,
-        en.polarization, #TODO - remove this to another step with try except for PV access error
-        0,
         slitsc,
         -0.05,
-        TEMZ,
-        1
-        #dm7, ## PK 20240625 - commenting out because it throws an error while running nmode #TODO - check with cherno about moving mirror 4 back as well
-        #80 ## PK 20240528: Changed from -80 to 80 because while running nmode, I got LimitError.  I think the negative sign is a typo and DM7 is supposed to move up to get out of the way.
     )
     print("moving back to 1200 l/mm grating")
     yield from grating_to_1200()
@@ -327,6 +299,7 @@ def all_out():
     yield from bps.mv(mono_en.cff, 2)
     print("moving to 270 eV")
     yield from bps.mv(en, 270)
+    yield from bps.mv(en.polarization, 0)
     RE.md.update(
         {
             "RSoXS_Config": "inactive",

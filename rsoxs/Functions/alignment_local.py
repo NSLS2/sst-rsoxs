@@ -161,7 +161,9 @@ def offset_bar(xoff, yoff, zoff, thoff, bar=None):
         sample_recenter_sample(samp)
     
     
-def default_sample(name,proposal_id,institution='NIST',grazing=False,front=True):
+def default_sample(name,
+                   #proposal_id,
+                   institution='NIST',grazing=False,front=True):
     return {
         "institution": institution,
         "acquisitions": [],
@@ -183,7 +185,7 @@ def default_sample(name,proposal_id,institution='NIST',grazing=False,front=True)
         "notes": "",
         "sample_set": "",
         "sample_state": "",
-        "proposal_id" : proposal_id,
+        #"proposal_id" : proposal_id,
     }
 from bluesky.callbacks.mpl_plotting import QtAwareCallback
 class BarPlotter(QtAwareCallback):
@@ -288,9 +290,12 @@ def update_bar(loc_Q, front, inbar=None):
         lastclicked = 0
         if front:
             # add / replace the front fiducial bar entries (bar[0], bar[-1])
-            AF1 = default_sample("AF1_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
-            AF2 = default_sample("AF2_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
-            diode = default_sample("diode",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+            #AF1 = default_sample("AF1_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+            #AF2 = default_sample("AF2_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+            #diode = default_sample("diode",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+            AF1 = default_sample("AF1_front",institution=gbar[0]['institution'],front=True)
+            AF2 = default_sample("AF2_front",institution=gbar[0]['institution'],front=True)
+            diode = default_sample("diode",institution=gbar[0]['institution'],front=True)
             if sample_by_name("AF1_front") is not None:
                 gbar.remove(sample_by_name("AF1_front"))
             if sample_by_name("AF2_front") is not None:
@@ -306,10 +311,12 @@ def update_bar(loc_Q, front, inbar=None):
         else:
             # if front fiducials don't exist,add dummy ones (so thge AF2 ones are in the correct position)
             if sample_by_name("AF1_front") is None:
-                AF1 = default_sample("AF1_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+                #AF1 = default_sample("AF1_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+                AF1 = default_sample("AF1_front",institution=gbar[0]['institution'],front=True)
                 gbar.insert(0, AF1)
             if sample_by_name("AF2_front") is None:
-                AF2 = default_sample("AF2_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+                #AF2 = default_sample("AF2_front",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=True)
+                AF2 = default_sample("AF2_front",institution=gbar[0]['institution'],front=True)
                 gbar.insert(1, AF2) #gbar.append(AF2)
 
             # add / replace the back fiducial bar entries (bar[1], bar[-2])
@@ -318,8 +325,10 @@ def update_bar(loc_Q, front, inbar=None):
                 gbar.remove(sample_by_name("AF1_back"))
             if sample_by_name("AF2_back") is not None:
                 gbar.remove(sample_by_name("AF2_back"))
-            AF1 = default_sample("AF1_back",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=False)
-            AF2 = default_sample("AF2_back",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=False)
+            #AF1 = default_sample("AF1_back",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=False)
+            #AF2 = default_sample("AF2_back",proposal_id=gbar[0]['proposal_id'],institution=gbar[0]['institution'],front=False)
+            AF1 = default_sample("AF1_back",institution=gbar[0]['institution'],front=False)
+            AF2 = default_sample("AF2_back",institution=gbar[0]['institution'],front=False)
             gbar.insert(1, AF1)  # inserts in the second position
             gbar.insert(1, AF2) #gbar.insert(-1, AF2)  # inserts in the second to last position
         while True:

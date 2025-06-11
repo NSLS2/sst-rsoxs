@@ -28,7 +28,7 @@ from ..HW.detectors import (
     exposure,
 )
 from nbs_bl.plans.scans import nbs_count
-from ..Functions.alignment import sample
+#from ..Functions.alignment import sample
 from ..startup import RE
 from ..HW.energy import set_polarization
 from nbs_bl.printing import run_report, boxed_text
@@ -263,7 +263,7 @@ def snapsaxs(line):
 
 del snapsaxs
 
-
+    
 @register_line_magic
 def snapwaxs(line):
     try:
@@ -307,6 +307,7 @@ def md(line):
 del md
 
 
+"""
 class RSoXSPrompt(Prompts):
     def in_prompt_tokens(self, cli=None):
         if RE.md.get("analysis_dir", None) and len(RE.md["analysis_dir"]) > 0: #if len(RE.md["analysis_dir"]) > 0: ## 20250123 - ran into error while loading sample
@@ -326,10 +327,10 @@ class RSoXSPrompt(Prompts):
 
 ip = get_ipython()
 ip.prompts = RSoXSPrompt(ip)
-
+"""
 
 def beamline_status():
-    sample()
+    #sample()
     boxed_text(
         "Detector status",
         exposure()

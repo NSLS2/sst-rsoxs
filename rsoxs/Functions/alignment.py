@@ -32,6 +32,8 @@ from nbs_bl.hw import (
     #dm7,
 )
 
+from nbs_bl.samples import move_sample
+
 ## An alternative way to load devices is:
 # from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 # Beamstop_SAXS = bl["Beamstop_SAXS"] ## what follows bl is the key in devices.toml in profile_collection contained in the []
@@ -56,7 +58,7 @@ from .alignment_local import *
 
 run_report(__file__)
 
-
+"""
 def sample():
     title = "Sample metadata - stored in every scan:"
     text = ""
@@ -117,7 +119,7 @@ def sample():
     if len(str(RE.md["notes"])) > 0:
         text += "\n   Notes:                 " + colored("{}".format(RE.md["notes"]).center(48, " "), "cyan")
     boxed_text(title, text, "red", 80, shrink=False)
-
+"""
 
 def get_location(motor_list):
     locs = []
@@ -189,7 +191,7 @@ def move_to_location(locs=get_sample_location()):
         BeamStopS: BeamStopS,
         BeamStopW: BeamStopW,
         slitsc: slitsc,
-        dm7: dm7,
+        #dm7: dm7,
     }
     for order in orderlist:
 
@@ -242,8 +244,8 @@ def get_sample_dict(acq=[], locations=None):
     sample_set = RE.md["sample_set"]
     sample_date = RE.md["sample_date"]
     project_name = RE.md["project_name"]
-    proposal_id = RE.md["proposal_id"]
-    saf_id = RE.md["SAF"]
+    #proposal_id = RE.md["proposal_id"]
+    #saf_id = RE.md["SAF"]
     institution = RE.md["institution"]
     project_desc = RE.md["project_desc"]
     composition = RE.md["composition"]
@@ -264,8 +266,8 @@ def get_sample_dict(acq=[], locations=None):
         "sample_desc": sample_desc,
         "sample_id": sample_id,
         "sample_priority": sample_priority,
-        "proposal_id": proposal_id,
-        "SAF": saf_id,
+        #"proposal_id": proposal_id,
+        #"SAF": saf_id,
         "institution": institution,
         "sample_set": sample_set,
         "sample_date": sample_date,
@@ -301,15 +303,22 @@ def load_sample(sam_dict, sim_mode=False):
     yield from move_to_location(locs=sam_dict["location"])
 
 
-def load_samp(num_or_id, sim_mode=False):
+def load_samp(
+        num_or_id, 
+        #sample_id, 
+        sim_mode=False):
     """
     move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
 
     :param sam_dict: sample dictionary containing all metadata and sample location
     :return:
     """
+    ## Eliot's old code
     sam_dict = samp_dict_from_id_or_num(num_or_id)
     yield from load_sample(sam_dict, sim_mode)
+
+    ## Jamie's function
+    # yield from move_sample(sample_id)
 
 
 def newsample():
