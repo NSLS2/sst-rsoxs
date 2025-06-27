@@ -320,6 +320,11 @@ def load_samp(
     ## Jamie's function
     # yield from move_sample(sample_id)
 
+def get_sample_id_and_index(sample_id_or_index):
+    if isinstance(sample_id_or_index, int):
+        try: sample_id = rsoxs_config["bar"][sample_id_or_index][]
+
+
 
 def newsample():
     """
