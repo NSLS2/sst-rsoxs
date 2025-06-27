@@ -58,6 +58,71 @@ from .alignment_local import *
 
 run_report(__file__)
 
+
+
+
+
+
+
+def load_samp(
+        num_or_id, 
+        #sample_id, 
+        sim_mode=False):
+    """
+    move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
+
+    :param sam_dict: sample dictionary containing all metadata and sample location
+    :return:
+    """
+    ## Eliot's old code
+    sam_dict = samp_dict_from_id_or_num(num_or_id)
+    yield from load_sample(sam_dict, sim_mode)
+
+    ## Jamie's function
+    # yield from move_sample(sample_id)
+
+def get_sample_id_and_index(sample_id_or_index):
+    """
+    Returns both sample_id and index number (from sample list) from an input that is either the sample_id or index.
+    """
+    
+    if isinstance(sample_id_or_index, int): ## Sample index was inputted
+        try: 
+            sample_id = rsoxs_config["bar"][sample_id_or_index]["sample_id"]
+            sample_index = sample_id_or_index
+        except: raise ValueError("Sample number" + str(sample_id_or_index) + "not found.")
+    elif isinstance(sample_id_or_index, str): ## Sample name was inputted
+        sample_found = False
+        for index, sample in enumerate(rsoxs_config["bar"]):
+            if sample["sample_id"] == sample_id_or_index:
+                sample_index = index
+                sample_id = sample_id_or_index
+                sample_found = True
+                break
+        if sample_found == False: raise ValueError("Sample ID" + str(sample_id_or_index) + "not found.")
+    
+    return sample_id, int(sample_index)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Eliot's code
+
 """
 def sample():
     title = "Sample metadata - stored in every scan:"
@@ -303,26 +368,7 @@ def load_sample(sam_dict, sim_mode=False):
     yield from move_to_location(locs=sam_dict["location"])
 
 
-def load_samp(
-        num_or_id, 
-        #sample_id, 
-        sim_mode=False):
-    """
-    move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
 
-    :param sam_dict: sample dictionary containing all metadata and sample location
-    :return:
-    """
-    ## Eliot's old code
-    sam_dict = samp_dict_from_id_or_num(num_or_id)
-    yield from load_sample(sam_dict, sim_mode)
-
-    ## Jamie's function
-    # yield from move_sample(sample_id)
-
-def get_sample_id_and_index(sample_id_or_index):
-    if isinstance(sample_id_or_index, int):
-        try: sample_id = rsoxs_config["bar"][sample_id_or_index][]
 
 
 
