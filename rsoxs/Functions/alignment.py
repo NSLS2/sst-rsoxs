@@ -84,6 +84,8 @@ def load_samp(
 def get_sample_id_and_index(sample_id_or_index):
     """
     Returns both sample_id and index number (from sample list) from an input that is either the sample_id or index.
+
+    See sst-rsoxs issue #37 for motivation.
     """
     
     if isinstance(sample_id_or_index, int): ## Sample index was inputted
