@@ -42,7 +42,6 @@ from ..HW.detectors import set_exposure  # , saxs_det
 from ..HW.energy import en, set_polarization, grating_to_1200, grating_to_250, grating_to_rsoxs
 from nbs_bl.printing import run_report, boxed_text, colored
 from ..HW.slackbot import rsoxs_bot
-from . import configurations
 from .common_functions import args_to_string
 
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step
@@ -273,25 +272,8 @@ def move_to_location(locs=get_sample_location()):
         yield from bps.mv(*flat_list)
 
 
-def get_location_from_config(config):
-    config_func = getattr(configurations, config)
-    return config_func()[0]
 
 
-def get_md_from_config(config):
-    config_func = getattr(configurations, config)
-    return config_func()[1]
-
-
-def load_configuration_old(config, sim_mode=False):
-    """
-    :param config: string containing a name of a configuration
-    :return:
-    """
-    if sim_mode:
-        return f"moved to {config} configuration"
-    yield from move_to_location(get_location_from_config(config))
-    RE.md.update(get_md_from_config(config)) ## This is where contents from rsoxs_config["bar"] are getting put into RE.md.
 
 
 def get_sample_dict(acq=[], locations=None):
