@@ -4,7 +4,7 @@ import datetime
 from copy import deepcopy
 from nbs_bl.printing import run_report, boxed_text
 from rsoxs_scans.rsoxs import dryrun_rsoxs_plan
-from .alignment import load_sample, move_to_location, spiralsearch, rotate_sample
+from .alignment import load_sample, move_to_location, rotate_sample
 from rsoxs.configuration_setup.configurations_instrument import load_configuration
 from nbs_bl.hw import (
     tem_tempstage,
