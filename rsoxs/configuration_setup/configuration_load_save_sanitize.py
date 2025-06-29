@@ -546,7 +546,10 @@ def gatherAcquisitionsFromConfiguration(configuration):
 
 
 def get_sample_dictionary_nbs_format_from_rsoxs_config(configuration):
-    #if configuration is None: configuration = copy.deepcopy(rsoxs_config["bar"])
+    """
+    Converts list of samples from the format used in rsoxs_config to that used by nbs-bl's manipulator object.
+    """
+
     bar_dict = {}
     for sample_dict in configuration:
         sample_id = sample_dict.pop("sample_id")
@@ -559,9 +562,14 @@ def get_sample_dictionary_nbs_format_from_rsoxs_config(configuration):
                     coordinates.append(loc.get("position"))
                     break
         if len(coordinates) != 4:
-            raise ValueError(f"Sample {sample_dict['name']} has {len(coordinates)} positions, expected 4")
-        sample_dict["position"] = {"coordinates": coordinates}
-        sample_dict["origin"] = "absolute"
-        sample_dict["description"] = sample_dict.get("sample_desc", "")
-        bar_dict[sample_id] = sample_dict
+            ## Before picking sample locations from bar image, the spreadsheet does not have sample locations.
+            ## Workaround for now is to skip these samples.
+            #raise ValueError(f"Sample {sample_dict['name']} has {len(coordinates)} positions, expected 4")
+            print(f"Sample {sample_dict['name']} has {len(coordinates)} positions, expected 4.  Not including this sample in nbs-bl's manipulator.")
+        else:
+            sample_dict["position"] = {"coordinates": coordinates}
+            sample_dict["origin"] = "absolute"
+            sample_dict["description"] = sample_dict.get("sample_desc", "")
+            bar_dict[sample_id] = sample_dict
+    
     return bar_dict
