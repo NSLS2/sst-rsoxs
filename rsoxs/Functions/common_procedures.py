@@ -707,9 +707,3 @@ def ramp_temp_test(temp,ramp_rate,interval,energies,pols,name):
                 yield from bps.count([waxs_det])
 
 
-def do_hopg_nexafs(sizes,pols):
-    for gaps in sizes:
-        RE(bps.mv(slits1.vsize,gaps))
-        RE.md['sample_id']=f'HOPG_vslit{gaps}'
-        RE.md['sample_name']=f'HOPG_vslit{gaps}'
-        RE(do_nexafs(edge='carbon',speed=.2,cycles=0,polarizations=pols))

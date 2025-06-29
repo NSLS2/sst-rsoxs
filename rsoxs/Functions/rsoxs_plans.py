@@ -3,10 +3,7 @@ from bluesky.preprocessors import finalize_decorator
 import datetime
 from copy import deepcopy
 from nbs_bl.printing import run_report, boxed_text
-from rsoxs_scans.acquisition import dryrun_bar, time_sec
-from rsoxs_scans.spreadsheets import save_samplesxlsx, load_samplesxlsx
 from rsoxs_scans.rsoxs import dryrun_rsoxs_plan
-from rsoxs_scans.nexafs import dryrun_nexafs_plan, dryrun_nexafs_step_plan
 from .alignment import load_sample, load_configuration, move_to_location, spiralsearch, rotate_sample
 from nbs_bl.hw import (
     tem_tempstage,
@@ -140,69 +137,4 @@ def do_rsoxs(md=None, **kwargs):
         yield from run_queue_step(queue_step)
     print("End of RSoXS plan")
 
-
-def do_nexafs(md=None, **kwargs):
-    """
-    inputs:
-        edge,
-        speed='normal',
-        ratios=None,
-        cycles=0,
-        pol_mode="sample",
-        polarizations = [0],
-        angles = None,
-        grating='rsoxs',
-        diode_range='high',
-        temperatures=None,
-        temp_ramp_speed=10,
-        temp_wait=True,
-        md = None,
-    """
-    #if md == None:
-    #    md = deepcopy(dict(RE.md))
-    _md = deepcopy(dict(RE.md))
-    if md == None:
-        md = {}
-    _md.update(md)
-    outputs = dryrun_nexafs_plan(md=_md, **kwargs)
-    for i, out in enumerate(outputs):
-        out["acq_index"] = i
-        out["queue_step"] = 0
-    print("Starting NEXAFS plan")
-    for queue_step in outputs:
-        yield from run_queue_step(queue_step)
-    print("End of NEXAFS plan")
-
-
-def do_nexafs_step(md=None, **kwargs):
-    """
-    inputs:
-        edge,
-        exposure_time = 1,
-        frames='full',
-        ratios=None,
-        repeats =1,
-        polarizations = [0],
-        angles = None,
-        grating='rsoxs',
-        diode_range='high',
-        temperatures=None,
-        temp_ramp_speed=10,
-        temp_wait=True,
-        md=None,
-    """
-    #if md == None:
-    #    md = deepcopy(dict(RE.md))
-    _md = deepcopy(dict(RE.md))
-    if md == None:
-        md = {}
-    _md.update(md)
-    outputs = dryrun_nexafs_step_plan(md=_md, **kwargs)
-    for i, out in enumerate(outputs):
-        out["acq_index"] = i
-        out["queue_step"] = 0
-    print("Starting NEXAFS step plan")
-    for queue_step in outputs:
-        yield from run_queue_step(queue_step)
-    print("End of NEXAFS step plan")
 
