@@ -44,14 +44,7 @@ from nbs_bl.printing import run_report, boxed_text, colored
 from ..HW.slackbot import rsoxs_bot
 from . import configurations
 from .common_functions import args_to_string
-from .configurations import (
-    WAXSNEXAFS,
-    WAXS,
-    #SAXS,
-    SAXSNEXAFS,
-    SAXS_liquid,
-    WAXS_liquid,
-)
+
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step
 
 from .alignment_local import *
