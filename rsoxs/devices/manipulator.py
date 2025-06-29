@@ -5,10 +5,17 @@ from sst_base.motors import PrettyMotorFMBODeadbandFlyer
 from ophyd import Component as Cpt
 from nbs_bl.geometry.bars import AbsoluteBar
 
+from ..configuration_setup.configuration_load_save_sanitize import load_configuration_spreadsheet_local, get_sample_dictionary_nbs_format_from_rsoxs_config
+
 
 class RSoXSBar(AbsoluteBar):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def read_sample_file(self, filename):
+        configuration = load_configuration_spreadsheet_local(filename)
+        bar_dict = get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=configuration)
+        return bar_dict
     
 
 def ManipulatorBuilderRSOXS(prefix, *, name, **kwargs):

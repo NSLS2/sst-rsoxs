@@ -25,6 +25,22 @@ from ..redis_config import rsoxs_config
 
 
 
+def sync_rsoxs_config_to_nbs_manipulator():
+    """
+    Converts metadata from rsoxs_config["bar"] to format used by nbs-bl.
+    Then updates maniuplator sample list.
+    """
+
+    try:
+        samples_dictionary_nbs_format = get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=copy.deepcopy(rsoxs_config["bar"]))
+        manipulator.load_sample_dict(samples_dictionary_nbs_format)
+    except:
+        ## Before picking sample locations from bar image, the spreadsheet does not have sample locations.
+        ## Workaround for now is to pass until a spreadsheet with sample locations is loaded.
+        ## TODO: There is still an issue that an entire sample dictionary will not get sync'ed if a single sample does not have coordinates.  It would be good to remove that single sample rather than not sync the entire sample list.
+        print("At least one sample does not have location coordinates.  Reload sheet after coordinates are added to sync with nbs-bl.")
+        pass
+
 
 def load_sheet(file_path):
     """
@@ -36,16 +52,8 @@ def load_sheet(file_path):
     rsoxs_config["bar"] = copy.deepcopy(configuration)
     print("Replaced persistent configuration with configuration loaded from file path: " + str(file_path))
 
-    ## Sync nbs manipulator object
-    try:
-        samples_dictionary_nbs_format = get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=copy.deepcopy(rsoxs_config["bar"]))
-        manipulator.load_sample_dict(samples_dictionary_nbs_format)
-    except:
-        ## Before picking sample locations from bar image, the spreadsheet does not have sample locations.
-        ## Workaround for now is to pass until a spreadsheet with sample locations is loaded.
-        ## TODO: There is still an issue that an entire sample dictionary will not get sync'ed if a single sample does not have coordinates.  It would be good to remove that single sample rather than not sync the entire sample list.
-        print("At least one sample does not have location coordinates.  Reload sheet after coordinates are added to sync with nbs-bl.")
-        pass
+    sync_rsoxs_config_to_nbs_manipulator()
+    
     
     return
 

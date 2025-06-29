@@ -8,7 +8,10 @@ import numpy as np
 from functools import partial
 import bluesky.plan_stubs as bps
 from ophyd import Device
+
 from ..startup import RE, rsoxs_config  # bec, db
+from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
+
 from nbs_bl.hw import (
     psh10,
     slitsc,
@@ -18,6 +21,7 @@ from nbs_bl.hw import (
     shutter_y,
     slits2,
     slits3,
+    manipulator,
     sam_X,
     sam_Y,
     sam_Th,
@@ -48,6 +52,7 @@ from .common_functions import args_to_string
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step
 
 from .alignment_local import *
+
 
 run_report(__file__)
 
@@ -99,34 +104,13 @@ def get_sample_id_and_index(sample_id_or_index):
     return sample_id, int(sample_index)
 
 
-"""
-def get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=None):
-    if configuration is None: configuration = copy.deepcopy(rsoxs_config["bar"])
-    bar_dict = {}
-    for sample_dict in configuration:
-        sample_id = sample_dict.pop("sample_id")
-        sample_dict["name"] = sample_dict.get("sample_name", "")
-        location = sample_dict.get("location")
-        coordinates = []
-        for key in ["x", "y", "z", "th"]:
-            for loc in location:
-                if loc.get("motor") == key:
-                    coordinates.append(loc.get("position"))
-                    break
-        if len(coordinates) != 4:
-            raise ValueError(f"Sample {sample_dict['name']} has {len(coordinates)} positions, expected 4")
-        sample_dict["position"] = {"coordinates": coordinates}
-        sample_dict["origin"] = "absolute"
-        sample_dict["description"] = sample_dict.get("sample_desc", "")
-        bar_dict[sample_id] = sample_dict
-    return bar_dict
-"""
-"""
+
+
 def duplicate_sample(sample_index, name_suffix):
-    ###
+    """
     Creates a new sample by adding a new suffix followed by underscore on the old sample name.
     Useful for picking multiple spots on the same sample.
-    ###
+    """
 
     ## TODO: have function take in both sample_id and index?
 
@@ -136,9 +120,7 @@ def duplicate_sample(sample_index, name_suffix):
     new_sample_dictionary["sample_id"] += f"_{name_suffix}"
 
     rsoxs_config["bar"].append(new_sample_dictionary)
-    ## Sync nbs manipulator object
-    samples_dictionary_nbs_format = 
-"""
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 
