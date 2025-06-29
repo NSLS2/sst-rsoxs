@@ -1,5 +1,6 @@
 import bluesky.plans as bp
 from operator import itemgetter
+import copy
 from copy import deepcopy
 import collections
 import numpy as np
@@ -98,8 +99,46 @@ def get_sample_id_and_index(sample_id_or_index):
     return sample_id, int(sample_index)
 
 
+"""
+def get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=None):
+    if configuration is None: configuration = copy.deepcopy(rsoxs_config["bar"])
+    bar_dict = {}
+    for sample_dict in configuration:
+        sample_id = sample_dict.pop("sample_id")
+        sample_dict["name"] = sample_dict.get("sample_name", "")
+        location = sample_dict.get("location")
+        coordinates = []
+        for key in ["x", "y", "z", "th"]:
+            for loc in location:
+                if loc.get("motor") == key:
+                    coordinates.append(loc.get("position"))
+                    break
+        if len(coordinates) != 4:
+            raise ValueError(f"Sample {sample_dict['name']} has {len(coordinates)} positions, expected 4")
+        sample_dict["position"] = {"coordinates": coordinates}
+        sample_dict["origin"] = "absolute"
+        sample_dict["description"] = sample_dict.get("sample_desc", "")
+        bar_dict[sample_id] = sample_dict
+    return bar_dict
+"""
+"""
+def duplicate_sample(sample_index, name_suffix):
+    ###
+    Creates a new sample by adding a new suffix followed by underscore on the old sample name.
+    Useful for picking multiple spots on the same sample.
+    ###
 
+    ## TODO: have function take in both sample_id and index?
 
+    new_sample_dictionary = copy.deepcopy(rsoxs_config['bar'][sample_index])
+    new_sample_dictionary["location"] = get_sample_location()
+    new_sample_dictionary["sample_name"] += f"_{name_suffix}"
+    new_sample_dictionary["sample_id"] += f"_{name_suffix}"
+
+    rsoxs_config["bar"].append(new_sample_dictionary)
+    ## Sync nbs manipulator object
+    samples_dictionary_nbs_format = 
+"""
 
 
 
@@ -206,7 +245,7 @@ def get_sample_location():
     return locs
 
 
-def duplicate_sample(samp_num, name_suffix):
+def duplicate_sample_old(samp_num, name_suffix):
     newsamp = deepcopy(samp_dict_from_id_or_num(samp_num))
     newsamp["location"] = get_sample_location()
     newsamp["sample_name"] += f"_{name_suffix}"

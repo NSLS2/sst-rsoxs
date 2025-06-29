@@ -12,11 +12,15 @@ import uuid
 
 
 from nbs_bl.devices.sampleholders import SampleHolderBase
-#from nbs_bl.hw import manipulator ## 20250627 - For some reason, this throws an error even though devices can be imported fine in other files?  Possibly a circular import issue?
+from nbs_bl.hw import manipulator
 
 from ..plans.default_energy_parameters import energyListParameters
 
-from .configuration_load_save_sanitize import load_configuration_spreadsheet_local, save_configuration_spreadsheet_local
+from .configuration_load_save_sanitize import (
+    load_configuration_spreadsheet_local, 
+    save_configuration_spreadsheet_local,
+    get_sample_dictionary_nbs_format_from_rsoxs_config,
+)
 from ..redis_config import rsoxs_config
 
 
@@ -32,21 +36,16 @@ def load_sheet(file_path):
     rsoxs_config["bar"] = copy.deepcopy(configuration)
     print("Replaced persistent configuration with configuration loaded from file path: " + str(file_path))
 
-    ## TODO: Uncomment items below after import errors get resolved.
-    ## But larger issue is that there needs to be a way to keep nbs-bl's sample list in sync with rsoxs_config throughout the codebase, not just when loading a spreadsheet.
-    ## Otherwise, if a spreadsheet is not explicitly loaded, any other changes will not get reflected, and move_sample will not work consistently and reliably.
-    ## Update nbs-bl's sample list
-    """
-    try: manipulator.load_sample_file(filename=file_path)
-    except: 
+    ## Sync nbs manipulator object
+    try:
+        samples_dictionary_nbs_format = get_sample_dictionary_nbs_format_from_rsoxs_config(configuration=copy.deepcopy(rsoxs_config["bar"]))
+        manipulator.load_sample_dict(samples_dictionary_nbs_format)
+    except:
         ## Before picking sample locations from bar image, the spreadsheet does not have sample locations.
         ## Workaround for now is to pass until a spreadsheet with sample locations is loaded.
-        ## Unfortunately, this requires manually loading spreadsheet before scans can be run.
-        ## TODO: find better fix to keep nbs-bl's sample list sync'ed with rsoxs_config.
+        ## TODO: There is still an issue that an entire sample dictionary will not get sync'ed if a single sample does not have coordinates.  It would be good to remove that single sample rather than not sync the entire sample list.
         print("At least one sample does not have location coordinates.  Reload sheet after coordinates are added to sync with nbs-bl.")
-        pass 
-    """
-    #manipulator.load_sample_file(filename=file_path) ## Temporary testing to see what error gets thrown
+        pass
     
     return
 
