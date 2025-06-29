@@ -83,7 +83,7 @@ from nbs_bl.printing import run_report
 from nbs_bl.plans.scans import nbs_list_scan, nbs_gscan
 from nbs_bl.utils import merge_func
 
-from ..startup import rsoxs_config, RE
+from ..startup import RE
 from bluesky.utils import ensure_generator, short_uid as _short_uid, single_gen
 from bluesky.preprocessors import plan_mutator
 
