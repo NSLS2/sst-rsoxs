@@ -285,6 +285,10 @@ default_configurations = {
     
 }
 
+
+## TODO: see notes from 20250213 and 20241028 for CDSAXS configuration
+
+
 ## TODO: break up the function so that undulator movements are separated.  We lose PV write access during maintenance/shutdown periods.
 def all_out():
     yield from psh10.close()

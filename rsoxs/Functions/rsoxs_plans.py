@@ -13,7 +13,7 @@ from nbs_bl.hw import (
 )
 from ..HW.signals import High_Gain_diode_i400, setup_diode_i400
 from .energyscancore import NEXAFS_fly_scan_core, new_en_scan_core, NEXAFS_step_scan_core
-from ..startup import RE, rsoxs_config
+from ..startup import RE
 from ..HW.slackbot import rsoxs_bot
 
 run_report(__file__)
@@ -60,85 +60,7 @@ actions = {
 motors = {"temp_ramp_rate": tem_tempstage.ramp_rate}
 
 
-def run_bar( ## TODO: change name to run_queue
-    bar=None,
-    sort_by=["apriority"], ##TODO: consolidate with group and maybe call order.  Maybe turn into 2D array or ditionary or something.  So can list order of groups, then within each group sort by configuration, then sort by priority or something
-    rev=[False],
-    verbose=False, ## TODO: Make it true by default as a fail safe
-    dry_run=False,
-    group="all",
-    repeat_previous_runs = False
-):
-    """_summary_
 
-    Parameters
-    ----------
-    bar : _type_
-        _description_
-    sort_by : list, optional
-        _description_, by default ["apriority"]
-    rev : list, optional
-        _description_, by default [False]
-    verbose : bool, optional
-        _description_, by default False
-    dry_run : bool, optional
-        _description_, by default False
-    group : str, optional
-        _description_, by default 'all'
-    """
-    if bar == None:
-        bar = rsoxs_config['bar']
-    if dry_run:
-        verbose = True
-    queue = dryrun_bar(bar, sort_by=sort_by, rev=rev, print_dry_run=verbose, group=group, repeat_previous_runs = repeat_previous_runs)
-    if dry_run or len(queue) == 0:
-        return None
-    print("Starting Queue")
-    queue_start_time = datetime.datetime.now()
-    message = ""
-    acq_uids = []
-    for queue_step in queue: ## TODO: turn queue_step into its own function called run_acquisition or something
-        message += f"Starting acquisition #{queue_step['acq_index']+1} of {queue_step['total_acq']} total\n"
-        message += f"which should take {time_sec(queue_step['acq_time'])} plus overhead\n"
-        boxed_text("queue status", message, "red", width=120, shrink=True)
-        rsoxs_bot.send_message(message)
-
-        slack_message_start = queue_step.get("slack_message_start", "")
-        if len(slack_message_start) > 0:
-            rsoxs_bot.send_message(slack_message_start)
-        start_time = datetime.datetime.now()
-
-        for step in queue_step["steps"]:
-            output = (yield from run_queue_step(step)) ## TODO: change the name of this function like run_substeps or something
-            acq_uids.append(output)
-            
-        slack_message_end = queue_step.get("slack_message_end", "")
-        if len(slack_message_end) > 0:
-            rsoxs_bot.send_message(slack_message_end)
-        actual_acq_time = datetime.datetime.now() - start_time
-        actual_total_time = datetime.datetime.now() - queue_start_time
-
-        
-        for samp in bar:
-            for acq in samp["acquisitions"]:
-                if acq["uid"] == queue_step["uid"]:
-                    print(f'Acquisition uids adding {acq_uids}')
-                    acq.setdefault('runs',[])
-                    acq['runs'].append(acq_uids)
-                    print(f'Acquisition runs is now {acq["runs"]}')
-                    acq_uids.clear()
-                    if verbose:
-                        print("marked acquisition as run")
-
-        message = f"Finished.  Took {time_sec(actual_acq_time)} \n"
-        message += f'total time {time_sec(actual_total_time)}, expected {time_sec(queue_step["time_before"]+queue_step["acq_time"])}\n'
-        message += f'expected time remaining {time_sec(queue_step["time_after"])} plus overhead\n'
-
-    message = message[:message.rfind('expected')]
-    message += f"End of Queue"
-    rsoxs_bot.send_message(message)
-    boxed_text("queue status", message, "red", width=120, shrink=True)
-    return None
 
 
 def run_queue_step(step):
