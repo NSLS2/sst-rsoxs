@@ -31,8 +31,7 @@ from nbs_bl.hw import (
     Det_S,
     DownstreamLargeDiode_int,
 )
-from ..startup import RE, sd, rsoxs_config  # bec, db
-from .alignment import load_configuration, rsoxs_config, correct_bar
+from ..startup import sd  # bec, db
 
 
 ## TODO: Not sure why this is redefined identically as the function in flystream_wrapper.py, but end goal is to move to Jamie's function.
