@@ -158,6 +158,8 @@ def run_acquisitions_single(
                 acquisition["acquire_status"] = "Finished " + str(timeStamp) ## TODO: Add timestamp
                 rsoxs_config["bar"] = updateConfigurationWithAcquisition(rsoxs_config["bar"], acquisition)
 
+    sync_rsoxs_config_to_nbs_manipulator()
+
 
 
 

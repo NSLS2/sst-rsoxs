@@ -215,6 +215,7 @@ def sample_set_location(num):
     #     sample_dict
     # )  # change the x0, y0, theta to result in this new position (including angle)
     # return sample_dict
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 def get_sample_location():
@@ -227,12 +228,7 @@ def get_sample_location():
     return locs
 
 
-def duplicate_sample_old(samp_num, name_suffix):
-    newsamp = deepcopy(samp_dict_from_id_or_num(samp_num))
-    newsamp["location"] = get_sample_location()
-    newsamp["sample_name"] += f"_{name_suffix}"
-    newsamp["sample_id"] += f"_{name_suffix}"
-    rsoxs_config["bar"].append(newsamp)
+
 
 
 def move_to_location(locs=get_sample_location()):
@@ -558,3 +554,5 @@ def jog_samp_zoff(id_or_num, jog_val, write_default=True, move=True):
         raise ValueError(
             f'the sample {samp["sample_name"]} does not appear to have a bar_loc field yet, have you imaged the sample positions?'
         )
+    
+    sync_rsoxs_config_to_nbs_manipulator()

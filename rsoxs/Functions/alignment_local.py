@@ -266,6 +266,7 @@ def locate_samples_from_image( impath, front=True, bar=None):
         image = stitch_sample(False, False, False, from_image=impath, flip_file=False)
     # stitch samples will be sending signals, update bar will catch those signals and assign the positions to the bar
     update_bar(loc_Q, front,inbar=bar)
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 def update_bar(loc_Q, front, inbar=None):
