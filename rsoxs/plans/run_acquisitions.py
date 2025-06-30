@@ -24,6 +24,7 @@ from ..configuration_setup.configuration_load_save_sanitize import (
     sortAcquisitionsQueue,
     updateConfigurationWithAcquisition,
 )
+from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
 
 import bluesky.plan_stubs as bps
 from nbs_bl.samples import add_current_position_as_sample
@@ -157,6 +158,8 @@ def run_acquisitions_single(
                 timeStamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 acquisition["acquire_status"] = "Finished " + str(timeStamp) ## TODO: Add timestamp
                 rsoxs_config["bar"] = updateConfigurationWithAcquisition(rsoxs_config["bar"], acquisition)
+
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 

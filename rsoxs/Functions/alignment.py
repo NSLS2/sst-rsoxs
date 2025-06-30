@@ -1,5 +1,6 @@
 import bluesky.plans as bp
 from operator import itemgetter
+import copy
 from copy import deepcopy
 import collections
 import numpy as np
@@ -7,7 +8,10 @@ import numpy as np
 from functools import partial
 import bluesky.plan_stubs as bps
 from ophyd import Device
+
 from ..startup import RE, rsoxs_config  # bec, db
+from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
+
 from nbs_bl.hw import (
     psh10,
     slitsc,
@@ -17,6 +21,7 @@ from nbs_bl.hw import (
     shutter_y,
     slits2,
     slits3,
+    manipulator,
     sam_X,
     sam_Y,
     sam_Th,
@@ -42,19 +47,12 @@ from ..HW.detectors import set_exposure  # , saxs_det
 from ..HW.energy import en, set_polarization, grating_to_1200, grating_to_250, grating_to_rsoxs
 from nbs_bl.printing import run_report, boxed_text, colored
 from ..HW.slackbot import rsoxs_bot
-from . import configurations
 from .common_functions import args_to_string
-from .configurations import (
-    WAXSNEXAFS,
-    WAXS,
-    #SAXS,
-    SAXSNEXAFS,
-    SAXS_liquid,
-    WAXS_liquid,
-)
+
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step
 
 from .alignment_local import *
+
 
 run_report(__file__)
 
@@ -84,6 +82,8 @@ def load_samp(
 def get_sample_id_and_index(sample_id_or_index):
     """
     Returns both sample_id and index number (from sample list) from an input that is either the sample_id or index.
+
+    See sst-rsoxs issue #37 https://github.com/NSLS2/sst-rsoxs/issues/37 for motivation.
     """
     
     if isinstance(sample_id_or_index, int): ## Sample index was inputted
@@ -106,6 +106,26 @@ def get_sample_id_and_index(sample_id_or_index):
 
 
 
+def duplicate_sample(sample_index, name_suffix):
+    """
+    Creates a new sample by adding a new suffix followed by underscore on the old sample name.
+    Useful for picking multiple spots on the same sample.
+    """
+
+    ## TODO: have function take in both sample_id and index?
+
+    new_sample_dictionary = copy.deepcopy(rsoxs_config['bar'][sample_index])
+    
+    ## Set the current location and update sample name/id
+    new_sample_dictionary["location"] = get_sample_location()
+    new_sample_dictionary["sample_name"] += f"_{name_suffix}"
+    new_sample_dictionary["sample_id"] += f"_{name_suffix}"
+
+    ## Clear acquisitions so that there is no unwanted new acquisitions added to the list.
+    new_sample_dictionary["acquisitions"] = []
+
+    rsoxs_config["bar"].append(new_sample_dictionary)
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 
@@ -200,6 +220,7 @@ def sample_set_location(num):
     #     sample_dict
     # )  # change the x0, y0, theta to result in this new position (including angle)
     # return sample_dict
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 def get_sample_location():
@@ -212,12 +233,7 @@ def get_sample_location():
     return locs
 
 
-def duplicate_sample(samp_num, name_suffix):
-    newsamp = deepcopy(samp_dict_from_id_or_num(samp_num))
-    newsamp["location"] = get_sample_location()
-    newsamp["sample_name"] += f"_{name_suffix}"
-    newsamp["sample_id"] += f"_{name_suffix}"
-    rsoxs_config["bar"].append(newsamp)
+
 
 
 def move_to_location(locs=get_sample_location()):
@@ -278,25 +294,8 @@ def move_to_location(locs=get_sample_location()):
         yield from bps.mv(*flat_list)
 
 
-def get_location_from_config(config):
-    config_func = getattr(configurations, config)
-    return config_func()[0]
 
 
-def get_md_from_config(config):
-    config_func = getattr(configurations, config)
-    return config_func()[1]
-
-
-def load_configuration_old(config, sim_mode=False):
-    """
-    :param config: string containing a name of a configuration
-    :return:
-    """
-    if sim_mode:
-        return f"moved to {config} configuration"
-    yield from move_to_location(get_location_from_config(config))
-    RE.md.update(get_md_from_config(config)) ## This is where contents from rsoxs_config["bar"] are getting put into RE.md.
 
 
 def get_sample_dict(acq=[], locations=None):
@@ -528,150 +527,6 @@ def samxscan():
     yield from psh10.close()
 
 
-def spiralsearch(
-    diameter=0.6,
-    stepsize=0.2,
-    energy=270,
-    pol=0,
-    angle=None,
-    exposure=1,
-    repeats=1,
-    master_plan=None,
-    enscan_type="spiral",
-    dets=[],
-    sim_mode=False,
-    grating=None,
-    md=None,
-    force=False,
-    **kwargs,
-):
-    """conduct a spiral grid pattern of exposures
-
-    Parameters
-    ----------
-    diameter : float, optional
-        _description_, by default 0.6
-    stepsize : float, optional
-        _description_, by default 0.2
-    energy : int, optional
-        _description_, by default 270 -148.3
-    exposure : int, optional
-        _description_, by default 1
-    master_plan : _type_, optional
-        _description_, by default None
-    dets : list, optional
-        _description_, by default []
-    sim_mode : bool, optional
-        _description_, by default False
-    grating : _type_, optional
-        _description_, by default None
-    md : _type_, optional
-        the sample dictionary, by default None
-    force : bool, optional
-        force a spiral even if one was already started, by default False
-    Returns
-    -------
-    _type_
-        _description_
-
-    Yields
-    ------
-    _type_
-        _description_
-
-    Raises
-    ------
-    ValueError
-        _description_
-    """
-    if md is None:
-        md = RE.md
-    if len(str(md.get("bar_loc", {}).get("spiral_started", ""))) > 0 and not force:
-        print(f"spiral for {md['sample_name']} was already started, either force, or remove to run spiral again")
-        yield from bps.null()
-        return ""
-    arguments = dict(locals())
-    valid = True
-    validation = ""
-    newdets = []
-    signals = default_sigs
-    for argument in arguments:
-        if isinstance(argument, np.ndarray):
-            argument = list(argument)
-    del arguments["md"]  # no recursion here!
-    md.setdefault("acq_history", [])
-    md["acq_history"].append({"plan_name": "spiralsearch", "arguments": arguments})
-    md.update({"plan_name": enscan_type, "master_plan": master_plan, "plan_args": arguments})
-    for det in dets:
-        if not isinstance(det, Device):
-            try:
-                newdets.append(globals()[det])
-            except Exception:
-                valid = False
-                validation += f"detector {det} is not an ophyd device\n"
-    if len(newdets) != 1:
-        valid = False
-        validation += "a detector number not equal to 1 was given\n"
-
-    if isinstance(angle, (float, int)):
-        if -155 > angle or angle > 195:
-            valid = False
-            validation += f"angle of {angle} is out of range\n"
-    if sim_mode:
-        if valid:
-            retstr = f"scanning {newdets} at {energy} eV \n"
-            retstr += f"    with a diameter of {diameter} mm  and stepsize of {stepsize} mm\n"
-            return retstr
-        else:
-            return validation
-    if grating not in [None, "1200", 1200, "250", 250, "rsoxs"]:
-        valid = False
-        validation = f"invalid choice of grating {grating}"
-    if not valid:
-        raise ValueError(validation)
-    if grating in [1200, "1200"]:
-        yield from grating_to_1200()
-    elif grating in [250, "250"]:
-        yield from grating_to_250()
-    elif grating == "rsoxs":
-        yield from grating_to_rsoxs()
-    yield from bps.mv(en, energy)
-    yield from set_polarization(pol)
-
-    set_exposure(exposure)
-    old_n_exp = {}
-    for det in newdets:
-        old_n_exp[det.name] = det.number_exposures
-        det.number_exposures = repeats
-
-    x_center = sam_X.user_setpoint.get()
-    y_center = sam_Y.user_setpoint.get()
-    num = round(diameter / stepsize) + 1
-
-    if isinstance(angle, (float, int)):
-        print(f"moving angle to {angle}")
-        yield from rotate_now(angle)
-    md["bar_loc"]["spiral_started"] = RE.md["scan_id"] + 1
-
-    yield from bp.spiral_square(
-        newdets + signals,
-        sam_X,
-        sam_Y,
-        x_center=x_center,
-        y_center=y_center,
-        x_range=diameter,
-        y_range=diameter,
-        x_num=num,
-        y_num=num,
-        md=md,
-        per_step=partial(
-            one_nd_sticky_exp_step,
-            remember={},
-            take_reading=partial(take_exposure_corrected_reading, shutter=shutter_control, check_exposure=False),
-        ),
-    )
-
-    # md["bar_loc"]["spiral_started"] = db[-1]["start"]["uid"]
 
 
 def rotate_now(theta, force=False):
@@ -704,3 +559,5 @@ def jog_samp_zoff(id_or_num, jog_val, write_default=True, move=True):
         raise ValueError(
             f'the sample {samp["sample_name"]} does not appear to have a bar_loc field yet, have you imaged the sample positions?'
         )
+    
+    sync_rsoxs_config_to_nbs_manipulator()

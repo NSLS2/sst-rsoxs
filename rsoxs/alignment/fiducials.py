@@ -12,7 +12,6 @@ from nbs_bl.hw import (
 )
 from rsoxs.configuration_setup.configurations_instrument import load_configuration
 from ..Functions.alignment import (
-    #load_configuration, 
     rsoxs_config, 
     correct_bar
     )
@@ -24,8 +23,6 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
     angles = [-90 + thoffset, 0 + thoffset, 90 + thoffset, 180 + thoffset]
     xrange = 3.5
     startxss = [f2, f1]
-    ## 20250403 - Temporary changes because shutter does not work
-    #yield from bps.mv(shutter_y, 25) ## Shutter mechanism physically blocks beam rather than the piezo portion
     yield from bps.mv(shutter_enable, 0)
     yield from bps.mv(shutter_control, 0)
     yield from load_configuration("WAXSNEXAFS") ## Don't want to harm camera while rotating sample bar
@@ -51,8 +48,6 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
         yield from bps.mv(sam_Y, peaklist[-1]["WAXS Beamstop"][sam_Y.name])
         for startx, angle in zip(startxs, angles):
             yield from bps.mv(sam_X, startx, sam_Th, angle)
-            ## 20250403 - Temporary changes because shutter does not work
-            #yield from bps.mv(shutter_y, 26) ## Shutter mechanism physically lets beam pass rather than the piezo portion
             yield from bps.mv(shutter_control, 1)
             peaklist = []
             yield from rsoxs_fly_max(
@@ -67,9 +62,7 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
             )
             maxlocs.append(peaklist[-1]["WAXS Beamstop"][sam_X.name])
     
-    ## 20250403 - Temporary changes because shutter does not work
-    # #yield from bps.mv(shutter_y, 25) ## Shutter mechanism physically blocks beam rather than the piezo portion
-
+    
     print(maxlocs)  # [af2y,af2xm90,af2x0,af2x90,af2x180,af1y,af1xm90,af1x0,af1x90,af1x180]
     accept = input(f"Do you want to apply this correction (y,n)?")
     if accept in ["y", "Y", "yes"]:

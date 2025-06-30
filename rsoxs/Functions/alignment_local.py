@@ -13,6 +13,7 @@ import bluesky.plan_stubs as bps
 from ophyd import Device
 from bluesky.preprocessors import finalize_decorator
 from ..redis_config import rsoxs_config #bec, db 
+from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
 from nbs_bl.hw import(
     sam_viewer,   
     SampleViewer_cam
@@ -265,6 +266,7 @@ def locate_samples_from_image( impath, front=True, bar=None):
         image = stitch_sample(False, False, False, from_image=impath, flip_file=False)
     # stitch samples will be sending signals, update bar will catch those signals and assign the positions to the bar
     update_bar(loc_Q, front,inbar=bar)
+    sync_rsoxs_config_to_nbs_manipulator()
 
 
 def update_bar(loc_Q, front, inbar=None):
@@ -629,6 +631,7 @@ def correct_bar(fiduciallist, include_back, training_wheels=True, bar = None):
         rotate_sample(samp)  # this will take the positions found above and the desired incident angle and
         # rotate the location of the sample accordingly
     rsoxs_config['bar'] = bar #event_model.sanitize_doc() #rsoxs_config['bar'] = orjson.dumps(bar)
+    sync_rsoxs_config_to_nbs_manipulator()
     
 def zoffset(af1zoff, af2zoff, y, front=True, height=0.25, af1y=-186.3, af2y=4):
     """
@@ -747,46 +750,6 @@ def read_positions(bar=None):
     for samp in bar:
         sample_recenter_sample(samp)
 
-
-def resolve_spirals(bar=None):
-    if bar == None:
-        bar = rsoxs_config['bar']
-    for samp in bar:
-        if len(str(samp['bar_loc'].get('spiral_started',''))) > 0 and len(samp['bar_loc'].get('spiral_done','')) == 0:
-            h = db.v2[samp['bar_loc']['spiral_started']]
-            ys = h['primary']['data']['RSoXS Sample Up-Down'].read()
-            xs = h['primary']['data']['RSoXS Sample Outboard-Inboard'].read()
-            th = h['baseline']['data']['RSoXS Sample Rotation'][0]#th = h['baseline']['data']['RSoXS Sample Rotation'].read()[0]
-            z = h['baseline']['data']['RSoXS Sample Downstream-Upstream'][0]#z = h['baseline']['data']['RSoXS Sample Downstream-Upstream'].read()[0]
-            #xs = np.array(list(h.data('RSoXS Sample Outboard-Inboard')))
-            #th = np.array(list(h.data('RSoXS Sample Rotation','baseline')))[0]
-            #z = np.array(list(h.data('RSoXS Sample Downstream-Upstream','baseline')))[0]
-            if len(ys) == len(xs) and len(ys > 0):
-                im_num = input(f"sample {samp['sample_name']} scan {h.start['scan_id']} which image number (or numbers, seperated by commas) is/are best?  ")
-                for i,im in enumerate(im_num.split(",")):
-                    im = int(im)
-                    if i>0:
-                        accept = input(f"duplicate {samp['sample_name']} to a new sample with position {im} at ({xs[im],ys[im]}) (y,n)?")
-                        if accept in ['y','Y','yes']:
-                            newsamp =deepcopy(samp)
-                            newsamp['location'] = [{'motor':'x','position':xs[im]},
-                                                {'motor':'y','position':ys[im]},
-                                                {'motor':'th','position':th},
-                                                {'motor':'z','position':z}]
-                            newsamp['bar_loc']['spiral_done']={"scan":h.start['uid'],
-                                                'best_num':im}
-                            newsamp['sample_name']+=f'_{i}'
-                            newsamp['sample_id']+=f'_{i}'
-                            bar.append(newsamp)
-                    else:
-                        accept = input(f"image {im} at ({xs[im],ys[im]}) is correct (y,n)?")
-                        if accept in ['y','Y','yes']:
-                            samp['location'] = [{'motor':'x','position':xs[im]},
-                                                {'motor':'y','position':ys[im]},
-                                                {'motor':'th','position':th},
-                                                {'motor':'z','position':z}]
-                            samp['bar_loc']['spiral_done']={"scan":h.start['uid'],
-                                                'best_num':im}
                             
 
 

@@ -589,73 +589,6 @@ def vent():
     print("")
 
 
-def tune_pgm(
-    cs=[1.4, 1.35, 1.35],
-    ms=[1, 1, 2],
-    energy=291.65,
-    pol=90,
-    k=250,
-    detector=None,
-    signal="RSoXS Sample Current",
-    grat_off_search = 0.08,
-    grating_rb_off = 0,
-    mirror_rb_off = 0,
-    search_ratio = 30,
-    scan_time = 30,
-):
-    # RE(load_sample(sample_by_name(bar, 'HOPG')))
-    # RE(tune_pgm(cs=[1.35,1.37,1.385,1.4,1.425,1.45],ms=[1,1,1,1,1],energy=291.65,pol=90,k=250))
-    # RE(tune_pgm(cs=[1.55,1.6,1.65,1.7,1.75,1.8],ms=[1,1,1,1,1],energy=291.65,pol=90,k=1200))
-
-    detector = detector if detector else Sample_TEY_int  ## Cannot have device in function definition for gui
-
-    yield from bps.mv(en.polarization, pol)
-    yield from bps.mv(en, energy)
-    detector.kind = "hinted"
-    mirror_measured = []
-    grating_measured = []
-    energy_measured = []
-    m_measured = []
-    # bec.enable_plots()
-    for cff, m_order in zip(cs, ms):
-        m_set, g_set = get_mirror_grating_angles(energy, cff, k, m_order)
-        print(f'setting cff to {cff} for a mirror with k={k} at {m_order} order')
-        m_set += mirror_rb_off
-        g_set += grating_rb_off
-        yield from bps.mv(grating.velocity, 0.1, mirror2.velocity, 0.1)
-        yield from bps.sleep(1)
-        yield from bps.mv(grating, g_set, mirror2, m_set)
-        yield from bps.sleep(1)
-        peaklist = []
-        yield from fly_max(
-            detectors=[detector],
-            signals=[signal],
-            motor=grating,
-            start=g_set - grat_off_search,
-            stop=g_set + grat_off_search,
-            velocities=[grat_off_search*2/scan_time, grat_off_search*2/(search_ratio * scan_time), grat_off_search*2/(search_ratio**2 * scan_time)],
-            snake=False,
-            peaklist=peaklist,
-            range_ratio=search_ratio,
-            open_shutter=True,
-            rb_offset=grating_rb_off
-        )
-        grating_measured.append(peaklist[0][signal]["Mono Grating angle"] - grating_rb_off )
-        mirror_measured.append(mirror2.read()["Mono Mirror angle"]["value"] - mirror_rb_off)
-        energy_measured.append(291.65)
-        m_measured.append(m_order)
-    print(f"mirror positions: {mirror_measured}")
-    print(f"grating positions: {grating_measured}")
-    print(f"energy positions: {energy_measured}")
-    print(f"orders: {m_measured}")
-    fit = find_best_offsets(mirror_measured, grating_measured, m_measured, energy_measured, k)
-    print(fit)
-    accept = input("Accept these values and set the offset (y/n)? ")
-    if accept in ["y", "Y", "yes"]:
-        yield from bps.mvr(mirror2.user_offset, -fit.x[0], grating.user_offset, -fit.x[1])
-    # bec.disable_plots()
-    detector.kind = "normal"
-    return fit
 
 def reset_amps():
     yield from bps.mv(MC19_disable, 1, MC20_disable, 1, MC21_disable, 1)
@@ -707,9 +640,3 @@ def ramp_temp_test(temp,ramp_rate,interval,energies,pols,name):
                 yield from bps.count([waxs_det])
 
 
-def do_hopg_nexafs(sizes,pols):
-    for gaps in sizes:
-        RE(bps.mv(slits1.vsize,gaps))
-        RE.md['sample_id']=f'HOPG_vslit{gaps}'
-        RE.md['sample_name']=f'HOPG_vslit{gaps}'
-        RE(do_nexafs(edge='carbon',speed=.2,cycles=0,polarizations=pols))
