@@ -115,9 +115,14 @@ def duplicate_sample(sample_index, name_suffix):
     ## TODO: have function take in both sample_id and index?
 
     new_sample_dictionary = copy.deepcopy(rsoxs_config['bar'][sample_index])
+    
+    ## Set the current location and update sample name/id
     new_sample_dictionary["location"] = get_sample_location()
     new_sample_dictionary["sample_name"] += f"_{name_suffix}"
     new_sample_dictionary["sample_id"] += f"_{name_suffix}"
+
+    ## Clear acquisitions so that there is no unwanted new acquisitions added to the list.
+    new_sample_dictionary["acquisitions"] = []
 
     rsoxs_config["bar"].append(new_sample_dictionary)
     sync_rsoxs_config_to_nbs_manipulator()
