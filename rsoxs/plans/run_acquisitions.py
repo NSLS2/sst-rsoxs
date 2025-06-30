@@ -24,6 +24,7 @@ from ..configuration_setup.configuration_load_save_sanitize import (
     sortAcquisitionsQueue,
     updateConfigurationWithAcquisition,
 )
+from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
 
 import bluesky.plan_stubs as bps
 from nbs_bl.samples import add_current_position_as_sample
