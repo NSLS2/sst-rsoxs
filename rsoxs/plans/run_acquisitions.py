@@ -168,9 +168,82 @@ def run_acquisitions_single(
 
 
 
+"""
+
+for acq in myQueue:
+    RE(runAcquisitions_Single(acquisition=acq, dryrun=True))
 
 
-## Custom scripts for commissioning
+
+
+## Example queue dictionary
+
+
+myQueue = [
+
+{
+"sampleID": "OpenBeam",
+"configurationInstrument": "WAXSNEXAFS",
+"scanType": "nexafs_step",
+"energyListParameters": "carbon_NEXAFS",
+"exposureTime": 1,
+"exposuresPerEnergy": 1,
+"sampleAngles": [0],
+"polarizationFrame": "lab",
+"polarizations": [0, 90],
+"groupName": "IBM_NEXAFS",
+"priority": 1,
+},
+{
+"sampleID": "OpenBeam",
+"configurationInstrument": "WAXSNEXAFS",
+"scanType": "nexafs_step",
+"energyListParameters": "oxygen_NEXAFS",
+"exposureTime": 1,
+"exposuresPerEnergy": 1,
+"sampleAngles": [0],
+"polarizationFrame": "lab",
+"polarizations": [0, 90],
+"groupName": "IBM_NEXAFS",
+"priority": 1,
+},
+{
+"sampleID": "OpenBeam",
+"configurationInstrument": "WAXSNEXAFS",
+"scanType": "nexafs_step",
+"energyListParameters": "fluorine_NEXAFS",
+"exposureTime": 1,
+"exposuresPerEnergy": 1,
+"sampleAngles": [0],
+"polarizationFrame": "lab",
+"polarizations": [0, 90],
+"groupName": "IBM_NEXAFS",
+"priority": 1,
+},
+{
+"sampleID": "HOPG",
+"configurationInstrument": "WAXSNEXAFS",
+"scanType": "nexafs_step",
+"energyListParameters": "carbon_NEXAFS",
+"exposureTime": 1,
+"exposuresPerEnergy": 1,
+"sampleAngles": [20],
+"polarizationFrame": "lab",
+"polarizations": [90],
+"groupName": "IBM_NEXAFS",
+"priority": 1,
+},
+
+]
+
+
+
+"""
+
+
+## Custom scripts for commissioning #################################
+
+
 ## 20250711 mirror alignment parameter sweep to loop overnight
 def M1_parameter_sweep_FS6():
     
@@ -265,75 +338,13 @@ def M1_parameter_sweep_FS6():
     
 
 
+def I0_mesh_vertical_profile_energy_scan():
 
-"""
+    """
+    I0_positions = np.arange() ## TODO: Jog positions to decide where the mesh starts and ends
 
-for acq in myQueue:
-    RE(runAcquisitions_Single(acquisition=acq, dryrun=True))
+    for I0_position in I0_positions:
+        ## Move to I0 position
+        ## yield from nbs_energy_scan at carbon edge
 
-
-
-
-## Example queue dictionary
-
-
-myQueue = [
-
-{
-"sampleID": "OpenBeam",
-"configurationInstrument": "WAXSNEXAFS",
-"scanType": "nexafs_step",
-"energyListParameters": "carbon_NEXAFS",
-"exposureTime": 1,
-"exposuresPerEnergy": 1,
-"sampleAngles": [0],
-"polarizationFrame": "lab",
-"polarizations": [0, 90],
-"groupName": "IBM_NEXAFS",
-"priority": 1,
-},
-{
-"sampleID": "OpenBeam",
-"configurationInstrument": "WAXSNEXAFS",
-"scanType": "nexafs_step",
-"energyListParameters": "oxygen_NEXAFS",
-"exposureTime": 1,
-"exposuresPerEnergy": 1,
-"sampleAngles": [0],
-"polarizationFrame": "lab",
-"polarizations": [0, 90],
-"groupName": "IBM_NEXAFS",
-"priority": 1,
-},
-{
-"sampleID": "OpenBeam",
-"configurationInstrument": "WAXSNEXAFS",
-"scanType": "nexafs_step",
-"energyListParameters": "fluorine_NEXAFS",
-"exposureTime": 1,
-"exposuresPerEnergy": 1,
-"sampleAngles": [0],
-"polarizationFrame": "lab",
-"polarizations": [0, 90],
-"groupName": "IBM_NEXAFS",
-"priority": 1,
-},
-{
-"sampleID": "HOPG",
-"configurationInstrument": "WAXSNEXAFS",
-"scanType": "nexafs_step",
-"energyListParameters": "carbon_NEXAFS",
-"exposureTime": 1,
-"exposuresPerEnergy": 1,
-"sampleAngles": [20],
-"polarizationFrame": "lab",
-"polarizations": [90],
-"groupName": "IBM_NEXAFS",
-"priority": 1,
-},
-
-]
-
-
-
-"""
+    """
