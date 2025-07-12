@@ -204,6 +204,7 @@ def M1_parameter_sweep_FS6():
 
     
     ## Start at the defaults and do 1D sweeps
+    ## TODO: load mirror configuration and run that way
     yield from bps.mv(mir1.x, 1.3)
     yield from bps.mv(mir1.y, -18)
     yield from bps.mv(mir1.z, 0)
