@@ -23,8 +23,9 @@ class RSoXSParam(DynamicComboParam):
         self.rsoxs_plans = rsoxs_plans
         self.input_widget.clear()
         self.input_widget.addItem(self.dummy_text)
-
-        for key, plan_info in rsoxs_plans.items():
+        sorted_keys = sorted(rsoxs_plans, key=lambda x: rsoxs_plans[x]["name"])
+        for key in sorted_keys:
+            plan_info = rsoxs_plans[key]
             display_label = plan_info.get("name", key)
             self.input_widget.addItem(str(display_label), userData=key)
 
