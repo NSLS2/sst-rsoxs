@@ -28,6 +28,9 @@ dependencies = {file = ["requirements.txt"]}
 rsoxs-custom-scan = "rsoxs.qt.plans.rsoxsCustom:RSoXSCustomWidget"
 rsoxs-scan = "rsoxs.qt.plans.rsoxsPlan:RSoXSPlanWidget"
 
+[project.entry-points."nbs_gui.plans.beamlineModifier"]
+rsoxs-configuration = "rsoxs.qt.plans.rsoxsSetup:RSoXSBeamlineSetupParams"
+
 [project.entry-points."nbs_gui.plan_loaders"]
 rsoxs-gui-loader = "rsoxs.qt.plans.rsoxs_plan_loader:RSoXSPlanLoader"
 

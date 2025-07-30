@@ -7,6 +7,7 @@ from bluesky.preprocessors import finalize_wrapper
 
 from nbs_bl.beamline import GLOBAL_BEAMLINE
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step, trigger_and_read_with_shutter
+from rsoxs.configuration_setup.configurations_instrument import load_configuration
 
 
 def post_scan_hardware_reset():
@@ -15,6 +16,26 @@ def post_scan_hardware_reset():
     ## 20250403 - Temporary changes because shutter does not work
     # yield from bps.mv(shutter_y, 25) ## Shutter mechanism physically blocks beam rather than the piezo portion
     yield from bps.mv(shutter_control, 0)
+
+
+def rsoxs_configuration_decorator(func):
+    """
+    A decorator that sets up scans for RSoXS. Adds the ability to use the Greateyes detector, and open or close the shutter.
+    """
+
+    @merge_func(func)
+    def _inner(*args, configuration_name=None, **kwargs):
+        """
+        Parameters
+        ----------
+        configuration_name : str
+            The name of an RSoXS configuration to load (optional)
+        """
+        if configuration_name is not None:
+            yield from load_configuration(configuration_name)
+        return (yield from func(*args, **kwargs))
+
+    return _inner
 
 
 def rsoxs_waxs_decorator(func):
@@ -32,6 +53,7 @@ def rsoxs_waxs_decorator(func):
         The wrapped function with RSoXS metadata added
     """
 
+    @rsoxs_configuration_decorator
     @merge_func(func)
     def _inner(*args, use_2d_detector=False, extra_dets=[], dwell=1, n_exposures=1, open_shutter=True, **kwargs):
         """
@@ -95,12 +117,12 @@ def rsoxs_waxs_decorator(func):
         else:
             if open_shutter:
                 ## 20250403 - Temporary changes because shutter does not work
-                #yield from bps.mv(shutter_y, 26) ## Shutter mechanism physically lets beam pass rather than the piezo portion
+                # yield from bps.mv(shutter_y, 26) ## Shutter mechanism physically lets beam pass rather than the piezo portion
                 yield from bps.mv(shutter_control, 1)  # open the shutter for the run
             else:
                 ## 20250403 - Temporary changes because shutter does not work
-                #yield from bps.mv(shutter_y, 25) ## Shutter mechanism physically blocks beam rather than the piezo portion
-                yield from bps.mv(shutter_control, 0)  # close the shutter for the run    
+                # yield from bps.mv(shutter_y, 25) ## Shutter mechanism physically blocks beam rather than the piezo portion
+                yield from bps.mv(shutter_control, 0)  # close the shutter for the run
             return (
                 yield from finalize_wrapper(
                     plan=func(*args, extra_dets=extra_dets, dwell=dwell, **kwargs),
