@@ -1,8 +1,18 @@
-## TODO: update formatting when this issue/PR is merged: https://github.com/xraygui/nbs-bl/issues/1#issuecomment-2835813578
-## I might be able to do this in an automated function or using chatGPT
 
-## This is intended to contain a revised set of default parameters that would be used after refactoring the codebase
+## TODO: needs testing with beam by running energy scans
+## These parameters would be fed into _make_gscan_points function in nbs_bl.plans.scan_base with the format (start, step, stop, step, stop, etc.)
+## Some of the step sizes are being modified from Eliot's original energy lists so that the energy ranges are cleanly divisible by the step size and that reversing the energy parameters list 
+energyListParameters = {
+    "carbon_NEXAFS":  (250, 1.28, 282, 0.3, 297, 1.325, 350), 
+    "nitrogen_NEXAFS":  (370, 1, 397, 0.2, 407, 1, 440),
+    "oxygen_NEXAFS":  (500, 1, 525, 0.2, 540, 1, 560),
+    "fluorine_NEXAFS":  (650, 1.5, 680, 0.25, 700, 1.25, 740),
 
+    "carbon_RSoXS":  (250, 5, 270, 1, 282, 0.1, 287, 0.2, 292, 1, 305, 5, 350),
+    "nitrogen_RSoXS":  (380, 0.25, 397, 0.1, 407, 0.3, 440),
+}
+
+"""
 
 ## These parameters would be fed into _make_gscan_points function in nbs_bl.plans.scan_base with the format (start, stop, step, stop, step, etc.)
 ## In general, these are intended to recreate the energy lists from Eliot's old plan
@@ -46,3 +56,5 @@ energyListParameters = {
 }
 
 #energies_eliot = get_energies(edge=[380, 397, 407, 440], ratios=[2, 0.2, 2], frames=112)
+
+"""
