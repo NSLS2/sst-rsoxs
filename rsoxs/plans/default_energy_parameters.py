@@ -3,7 +3,7 @@
 ## These parameters would be fed into _make_gscan_points function in nbs_bl.plans.scan_base with the format (start, step, stop, step, stop, etc.).  Format updated in nbs-bl issue #1: https://github.com/xraygui/nbs-bl/issues/1
 ## Some of the step sizes are being modified from Eliot's original energy lists so that the energy ranges are cleanly divisible by the step size and that reversing the energy parameters list 
 ## TODO: ideally, I would like to import _make_gscan_points locally to test these scan parameters
-energyListParameters = {
+energy_list_parameters = {
     "carbon_NEXAFS":  (250, 1.28, 282, 0.3, 297, 1.325, 350), 
     "nitrogen_NEXAFS":  (370, 1, 397, 0.2, 407, 1, 440),
     "oxygen_NEXAFS":  (500, 1, 525, 0.2, 540, 1, 560),
