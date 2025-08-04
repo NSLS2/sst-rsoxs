@@ -12,7 +12,7 @@ from rsoxs.Functions.alignment import (
 from rsoxs.HW.energy import set_polarization
 from nbs_bl.plans.scans import nbs_count, nbs_energy_scan
 from rsoxs.plans.rsoxs import spiral_scan
-from .default_energy_parameters import energyListParameters
+from .default_energy_parameters import energy_list_parameters
 from rsoxs.HW.detectors import snapshot
 from ..startup import rsoxs_config
 from nbs_bl.hw import (
@@ -145,7 +145,7 @@ def run_acquisitions_single(
                     if acquisition["scan_type"]=="nexafs": use_2D_detector = False
                     if acquisition["scan_type"]=="rsoxs": use_2D_detector = True
                     energyParameters = acquisition["energy_list_parameters"]
-                    if isinstance(energyParameters, str): energyParameters = energyListParameters[energyParameters]
+                    if isinstance(energyParameters, str): energyParameters = energy_list_parameters[energyParameters]
                     #yield from snapshot(secs=acquisition["exposure_time"])
                     yield from nbs_energy_scan(
                             *energyParameters,
