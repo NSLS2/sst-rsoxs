@@ -11,7 +11,7 @@ import datetime
 import re, warnings, httpx
 import uuid
 
-from ..plans.default_energy_parameters import energyListParameters
+from ..plans.default_energy_parameters import energy_list_parameters
 
 
 
@@ -421,7 +421,7 @@ def sanitizeEnergyScan(acquisitionInput):
             0,
         )
     if isinstance(acquisition[parameterName], str):
-        if acquisition[parameterName] not in list(energyListParameters.keys()):
+        if acquisition[parameterName] not in list(energy_list_parameters.keys()):
             raise ValueError("Please enter valid energy plan.")
 
     return acquisition
