@@ -27,7 +27,6 @@ from nbs_bl.help import (
 )
 from nbs_bl.plans.scans import nbs_energy_scan
 
-from .default_energy_parameters import energyListParameters
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step
 
 try:
