@@ -279,6 +279,7 @@ acquisitionParameters_Default = {
     "polarizations": [0],
     "exposure_time": 1,
     "exposures_per_energy": 1,
+    "cycles": 0,
     "sample_angles": [0],
     "spiral_dimensions": None,  ## default for spirals is [0.3, 1.8, 1.8], [step_size, diameter_x, diameter_y], useful if our windows are rectangles, not squares
     "group_name": "Group",
@@ -354,6 +355,10 @@ def sanitizeAcquisition(acquisitionInput):
 
     parameterName = "exposures_per_energy"
     acquisition[parameterName] = int(acquisition[parameterName])
+
+    parameter_name = "cycles"
+    if acquisition[parameter_name] < 0: raise ValueError(str(parameter_name) + " must be a positive integer.")
+    if not isinstance(acquisition[parameter_name], int): raise ValueError(str(parameter_name) + " must be a positive integer.")
 
     parameterName = "priority"
     if not isinstance(acquisition[parameterName], (int, float)): raise TypeError(str(parameterName) + " must be an integer.")
