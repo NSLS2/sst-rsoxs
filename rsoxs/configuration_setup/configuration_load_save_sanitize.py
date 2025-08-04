@@ -358,7 +358,9 @@ def sanitizeAcquisition(acquisitionInput):
 
     parameter_name = "cycles"
     if acquisition[parameter_name] < 0: raise ValueError(str(parameter_name) + " must be a positive integer.")
-    if not isinstance(acquisition[parameter_name], int): raise ValueError(str(parameter_name) + " must be a positive integer.")
+    ## Spreadsheet will default to float value, so we have to check for both int and float and then convert float to int.
+    if not isinstance(acquisition[parameter_name], (int, float)): raise ValueError(str(parameter_name) + " must be a positive integer.")
+    acquisition[parameter_name] = int(acquisition[parameter_name])
 
     parameterName = "priority"
     if not isinstance(acquisition[parameterName], (int, float)): raise TypeError(str(parameterName) + " must be an integer.")
