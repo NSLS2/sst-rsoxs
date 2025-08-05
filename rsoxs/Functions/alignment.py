@@ -63,21 +63,17 @@ run_report(__file__)
 
 
 def load_samp(
-        num_or_id, 
-        #sample_id, 
-        sim_mode=False):
+        sample_id_or_index, 
+        ):
     """
     move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
 
-    :param sam_dict: sample dictionary containing all metadata and sample location
-    :return:
     """
-    ## Eliot's old code
-    sam_dict = samp_dict_from_id_or_num(num_or_id)
-    yield from load_sample(sam_dict, sim_mode)
+    
+    sample_id, sample_index = get_sample_id_and_index(sample_id_or_index=sample_id_or_index)
+    yield from move_sample(sample_id)
+    RE.md.update(rsoxs_config["bar"][sample_index])
 
-    ## Jamie's function
-    # yield from move_sample(sample_id)
 
 def get_sample_id_and_index(sample_id_or_index):
     """
@@ -354,6 +350,7 @@ def get_sample_dict(acq=[], locations=None):
     }
 
 
+## Used to be used with load_samp
 def load_sample(sam_dict, sim_mode=False):
     """
     move to a sample location and load the metadata with the sample information
