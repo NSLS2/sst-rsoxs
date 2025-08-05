@@ -59,6 +59,14 @@ def run_acquisitions_queue(
 
 
 
+
+
+## TODO: This function can benefit from refactoring.
+## As is, a single iteration of this function does not necessarily correspond to a single scan.  It may run multiple scans with multiple corresponding scan IDs if, e.g., multiple angles and polarizations are given.
+## As a result, the local uid and scan status are a bit misleading, as there might be multiple scans per spreadsheet line.
+## One idea is to change the spreadsheet workflow so that multiple samples, energy lists, etc. can be entered onto a single spreadsheet line to avoid writing out every acquisition one-by-one.  And then a separate function can be used to generate a queue with with a single line corresponding to one acquisition.
+## Separately, it would also be good to break this function into smaller sub-functions for better readability.
+
 def run_acquisitions_single(
         acquisition,
         dryrun = True
