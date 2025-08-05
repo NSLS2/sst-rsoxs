@@ -17,6 +17,8 @@ from rsoxs.HW.detectors import snapshot
 from ..startup import rsoxs_config
 from nbs_bl.hw import (
     en,
+    mir1,
+    fs6_cam,
 )
 from ..configuration_setup.configuration_load_save_sanitize import (
     gatherAcquisitionsFromConfiguration, 
@@ -237,3 +239,112 @@ myQueue = [
 
 
 """
+
+
+## Custom scripts for commissioning #################################
+
+
+## 20250711 mirror alignment parameter sweep to loop overnight
+def M1_parameter_sweep_FS6():
+    
+    comment_front_end = "FS6 image.  Front-end slits all the way open to hsize=7, hcenter=0.52, vsize=5, vcenter=-0.6.  FOE slits opened all the way to outboard=5, inboard=-5, top=5, bottom=-5."
+    
+    """
+    ## Not going to change y and z
+    comment_M1_y_z = comment_front_end + "  Mirror 1 y=-18, z=0"
+    comment_M1_x_pitch = comment_M1_y_z
+    
+    ## First let's keep M1 x and pitch the same and just sweep the others
+    M1_x = 1.3
+    yield from bps.mv(mir1.x, M1_x)
+    comment_M1_x_pitch = comment_M1_x_pitch + ", x=" + str(M1_x)
+    M1_pitch = 0.57
+    yield from bps.mv(mir1.pitch, M1_pitch)
+    comment_M1_x_pitch = comment_M1_x_pitch + ", pitch=" + str(M1_pitch)
+
+
+    for M1_yaw in np.arange(-10, 10, 1):
+        yield from bps.mv(mir1.yaw, M1_yaw)
+        comment = comment_M1_x_pitch + ", yaw=" + str(M1_yaw)
+
+        for M1_roll in np.arange(-10, 10, 1):
+            yield from bps.mv(mir1.roll, M1_roll)
+            comment = comment + ", roll=" + str(M1_roll)
+
+            yield from nbs_count(extra_dets=[fs6_cam], num=1, comment=comment)
+    
+    """
+
+    
+    ## Start at the defaults and do 1D sweeps
+    ## TODO: load mirror configuration and run that way
+    yield from bps.mv(mir1.x, 1.3)
+    yield from bps.mv(mir1.y, -18)
+    yield from bps.mv(mir1.z, 0)
+    yield from bps.mv(mir1.pitch, 0.57)
+    yield from bps.mv(mir1.yaw, 0)
+    yield from bps.mv(mir1.roll, 0)
+
+    for M1_roll in np.arange(-10, 10, 1):
+        yield from bps.mv(mir1.roll, M1_roll)
+        comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0, pitch=0.57, yaw=0"
+        comment = comment + ", roll=" + str(M1_roll)
+        
+        yield from nbs_count(extra_dets=[fs6_cam], num=1, comment=comment)
+
+    yield from bps.mv(mir1.roll, 0)
+    for M1_yaw in np.arange(-10, 10, 1):
+        yield from bps.mv(mir1.yaw, M1_yaw)
+        comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0, pitch=0.57"
+        comment = comment + ", yaw=" + str(M1_yaw)
+        comment = comment + ", roll=0"
+        
+        yield from nbs_count(extra_dets=[fs6_cam], num=1, comment=comment)
+
+    yield from bps.mv(mir1.yaw, 0)
+    for M1_x in np.array([-3, -2, -1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1,4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 3]):
+        yield from bps.mv(mir1.x, M1_x)
+        comment = comment_front_end + "  Mirror 1 x=" + str(M1_x)
+        comment = comment + ", y=-18, z=0, pitch=0.57, yaw=0, roll=0"
+        
+        yield from nbs_count(extra_dets=[fs6_cam], num=1, comment=comment)
+    
+    yield from bps.mv(mir1.x, 1.3)
+    for M1_pitch in np.arange(0, 2.5, 0.01):
+        yield from bps.mv(mir1.pitch, M1_pitch)
+        comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0"
+        comment = comment + ", pitch=" + str(M1_pitch)
+        comment = comment + ", yaw=0, roll=0"
+        
+        yield from nbs_count(extra_dets=[fs6_cam], num=1, comment=comment)
+
+    
+
+    ## Return back to defaults
+    yield from bps.mv(mir1.x, 1.3)
+    yield from bps.mv(mir1.y, -18)
+    yield from bps.mv(mir1.z, 0)
+    yield from bps.mv(mir1.pitch, 0.57)
+    yield from bps.mv(mir1.yaw, 0)
+    yield from bps.mv(mir1.roll, 0)
+
+
+    ## Didn't run this at this point but would be good to have a movie
+    ## TODO: In the future, sweeps of how the beam looks at different EPU gaps and phases would be good as well
+    comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0, pitch=0.57, yaw=0, roll=0"
+    yield from nbs_count(extra_dets=[fs6_cam], num=10000000000, comment=comment)
+
+    
+    
+
+
+def I0_mesh_vertical_profile_energy_scan():
+
+    """
+    I0_positions = np.arange() ## TODO: Jog positions to decide where the mesh starts and ends
+
+    for I0_position in I0_positions:
+        ## Move to I0 position
+        ## yield from nbs_energy_scan at carbon edge
+
+    """
