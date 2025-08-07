@@ -105,7 +105,6 @@ def run_acquisitions_single(
                 else: yield from set_polarization(polarization)
             
             print("Running scan: " + str(acquisition["scan_type"]))
-            add_current_position_as_sample(name=acquisition[parameter], sample_id=acquisition[parameter]) ## Probably temporary until we figure have this as part of load_samp.  Adding here so all angle rotations are included.
             if dryrun == False or updateAcquireStatusDuringDryRun == True:
                 timeStamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 acquisition["acquire_status"] = "Started " + str(timeStamp)
@@ -122,7 +121,6 @@ def run_acquisitions_single(
                     yield from nbs_count(num=acquisition["exposures_per_energy"], 
                                          use_2d_detector=use_2D_detector, 
                                          dwell=acquisition["exposure_time"],
-                                         sample=acquisition["sample_id"],
                                          )
                 
                 if acquisition["scan_type"] == "spiral":
@@ -138,7 +136,6 @@ def run_acquisitions_single(
                         widthY=acquisition["spiral_dimensions"][2],
                         n_exposures=acquisition["exposures_per_energy"], 
                         dwell=acquisition["exposure_time"],
-                        sample=acquisition["sample_id"],
                         )
 
                 if acquisition["scan_type"] in ("nexafs", "rsoxs"):
@@ -153,7 +150,6 @@ def run_acquisitions_single(
                             dwell=acquisition["exposure_time"],
                             n_exposures=acquisition["exposures_per_energy"], 
                             group_name=acquisition["group_name"],
-                            sample=acquisition["sample_id"],
                             )
             
             if dryrun == False or updateAcquireStatusDuringDryRun == True:
