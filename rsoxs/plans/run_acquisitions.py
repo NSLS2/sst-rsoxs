@@ -19,6 +19,8 @@ from nbs_bl.hw import (
     en,
     mir1,
     fs6_cam,
+    izero_y,
+    Det_W,
 )
 from ..configuration_setup.configuration_load_save_sanitize import (
     gatherAcquisitionsFromConfiguration, 
@@ -185,6 +187,8 @@ def run_acquisitions_single(
                                 group_name=acquisition["group_name"],
                                 sample=acquisition["sample_id"],
                                 )
+                    
+                    ## TODO: maybe default to cycles = 1?  It would be good practice to have forward and reverse scan to assess reproducibility
             
             if dryrun == False or updateAcquireStatusDuringDryRun == True:
                 timeStamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -274,9 +278,29 @@ myQueue = [
 ## Custom scripts for commissioning #################################
 
 
-## 20250711 mirror alignment parameter sweep to loop overnight
-def M1_parameter_sweep_FS6():
+
+
+def commissioning_scans_20250808():
+
+    yield from I0_mesh_vertical_profile_energy_scan()
     
+    yield from open_beam_waxs_photodiode_scans()
+    
+    
+
+        
+
+    
+
+
+
+
+
+
+
+
+## 20250711 mirror alignment parameter sweep to loop overnight
+def M1_parameter_sweep_FS6():   
     comment_front_end = "FS6 image.  Front-end slits all the way open to hsize=7, hcenter=0.52, vsize=5, vcenter=-0.6.  FOE slits opened all the way to outboard=5, inboard=-5, top=5, bottom=-5."
     
     """
@@ -364,17 +388,131 @@ def M1_parameter_sweep_FS6():
     comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0, pitch=0.57, yaw=0, roll=0"
     yield from nbs_count(extra_dets=[fs6_cam], num=10000000000, comment=comment)
 
-    
+
+
     
 
 
 def I0_mesh_vertical_profile_energy_scan():
 
-    """
-    I0_positions = np.arange() ## TODO: Jog positions to decide where the mesh starts and ends
+    
+    I0_positions = np.arange(-42.8, -24, 0.2) ## TODO: Jog positions to decide where the mesh starts and ends
+
+
+    yield from load_configuration("WAXSNEXAFS")
+
+    yield from load_samp("OpenBeam")
+    add_current_position_as_sample(name="OpenBeam", sample_id="OpenBeam")
 
     for I0_position in I0_positions:
-        ## Move to I0 position
-        ## yield from nbs_energy_scan at carbon edge
+        yield from bps.mv(izero_y, I0_position)
 
-    """
+        energy_parameters = energy_list_parameters["carbon_NEXAFS"]
+        yield from nbs_energy_scan(
+                            *energy_parameters,
+                            group_name="Assess different spots on I0 mesh",
+                            sample="OpenBeam",
+                            )
+
+    
+
+
+
+
+def open_beam_waxs_photodiode_scans():
+
+    configuraiton_instrument = "WAXSNEXAFS"
+
+    open_beam_queue = [
+
+    {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": configuraiton_instrument,
+    "scan_type": "nexafs",
+    "energy_list_parameters": "carbon_NEXAFS",
+    "polarizations": [0, 55, 90],
+    "cycles": 1,
+    "group_name": "Assess PGM contamination",
+    "priority": 1,
+    },
+
+    {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": configuraiton_instrument,
+    "scan_type": "nexafs",
+    "energy_list_parameters": "nitrogen_NEXAFS",
+    "polarizations": [0, 55, 90],
+    "cycles": 1,
+    "group_name": "Assess PGM contamination",
+    "priority": 2,
+    },
+
+    {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": configuraiton_instrument,
+    "scan_type": "nexafs",
+    "energy_list_parameters": "oxygen_NEXAFS",
+    "polarizations": [0, 55, 90],
+    "cycles": 1,
+    "group_name": "Assess PGM contamination",
+    "priority": 3,
+    },
+
+    {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": configuraiton_instrument,
+    "scan_type": "nexafs",
+    "energy_list_parameters": "fluorine_NEXAFS",
+    "polarizations": [0, 55, 90],
+    "cycles": 1,
+    "group_name": "Assess PGM contamination",
+    "priority": 4,
+    },
+
+    ]
+
+    ## Open beam scans to assess beam contamination
+    ## Multiple iterations to fill time
+    for iteration in np.arange(0, 1000, 1):
+        for acq in open_beam_queue:
+            yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+
+
+
+
+
+
+def WAXS_camera_position_offset_scans():
+
+
+
+    ## SBA-15 scans with WAXS camera moved to different positions
+    ## To decouple sample features from camera quadrant boundaries
+    yield from load_configuration("WAXS") 
+
+    ## Load SBA-15 sample.  This sample will stay in the same position throughout all scans.
+    yield from load_samp("SBA15")
+    add_current_position_as_sample(name="SBA15", sample_id="SBA15")
+
+    ## Trying different polarizations in case SBA-15 has some anisotropy
+    #for polarization in [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180]:
+    for polarization in [0, 90, 180, 45, 135, 15, 30, 60, 75, 105, 120, 150, 165]:
+        yield from set_polarization(polarization)
+
+        ## Iterate through different WAXS camera positions
+        ## The WAXS camera comes in diagonally, so it would move both to the side and further from the sample.
+        for waxs_detector_position in [2, -20, -40]:
+            yield from bps.mv(Det_W, waxs_detector_position)
+
+            ## Run an energy scan going from 100 eV to 1000 eV in 100 eV increments
+            ## Running 50 repeat exposures at each energy at 1 s exposure time each.
+            energy_parameters = (100, 100, 1000)
+            yield from nbs_energy_scan(
+                                *energy_parameters,
+                                use_2d_detector=True, 
+                                dwell=0.1,
+                                n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                                group_name="Assess WAXS camera quadrants",
+                                sample="SBA15",
+                                )
+
