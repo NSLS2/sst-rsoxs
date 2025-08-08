@@ -20,6 +20,7 @@ from nbs_bl.hw import (
     mir1,
     fs6_cam,
     izero_y,
+    manipulator,
     Det_W,
 )
 from ..configuration_setup.configuration_load_save_sanitize import (
@@ -31,6 +32,7 @@ from ..configuration_setup.configuration_load_save_sanitize import (
 from ..configuration_setup.configuration_load_save import sync_rsoxs_config_to_nbs_manipulator
 
 import bluesky.plan_stubs as bps
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.samples import add_current_position_as_sample
 
 
@@ -283,8 +285,20 @@ myQueue = [
 def commissioning_scans_20250808():
 
     yield from I0_mesh_vertical_profile_energy_scan()
-    
-    yield from open_beam_waxs_photodiode_scans()
+
+    yield from gold_mesh_contamination_kinetics(iterations=1)
+    yield from open_beam_waxs_photodiode_scans(iterations=1)
+
+    yield from WAXS_camera_flat_field_illumination_Al_foil()
+
+    yield from gold_mesh_contamination_kinetics(iterations=1)
+    yield from open_beam_waxs_photodiode_scans(iterations=1)
+
+    yield from WAXS_camera_flat_field_illumination_SiN()
+
+    for count in np.arange(0, 1000, 1):
+        yield from gold_mesh_contamination_kinetics(iterations=1)
+        yield from open_beam_waxs_photodiode_scans(iterations=1)
     
     
 
@@ -395,7 +409,9 @@ def M1_parameter_sweep_FS6():
 
 def I0_mesh_vertical_profile_energy_scan():
 
+
     
+    ## Full scan set
     I0_positions = np.arange(-42.8, -24, 0.2) ## TODO: Jog positions to decide where the mesh starts and ends
 
 
@@ -404,76 +420,88 @@ def I0_mesh_vertical_profile_energy_scan():
     yield from load_samp("OpenBeam")
     add_current_position_as_sample(name="OpenBeam", sample_id="OpenBeam")
 
-    for I0_position in I0_positions:
-        yield from bps.mv(izero_y, I0_position)
+    for polarization in [0, 90, 55]:
+        print("Setting polarization: " + str(polarization))
+        yield from set_polarization(polarization)
 
-        energy_parameters = energy_list_parameters["carbon_NEXAFS"]
-        yield from nbs_energy_scan(
-                            *energy_parameters,
-                            group_name="Assess different spots on I0 mesh",
-                            sample="OpenBeam",
-                            )
+        for I0_position in I0_positions:
+            print("Moving to izero_y position: " + str(I0_position))
+            yield from bps.mv(izero_y, I0_position)
 
+            energy_parameters = energy_list_parameters["carbon_NEXAFS"]
+            yield from nbs_energy_scan(
+                                *energy_parameters,
+                                group_name="Assess different spots on I0 mesh",
+                                sample="OpenBeam",
+                                )
+    
+
+    yield from load_configuration("WAXSNEXAFS")
     
 
 
+def gold_mesh_contamination_kinetics(iterations=1):
+
+    template_acquisition = {
+    "sample_id": "GoldGrid_AsIs",
+    "configuration_instrument": "WAXSNEXAFS",
+    "scan_type": "nexafs",
+    "energy_list_parameters": "carbon_NEXAFS",
+    "polarizations": [0],
+    "cycles": 1,
+    "group_name": "Monitor gold mesh contamination buildup",
+    "priority": 1,
+    }
+
+    gold_mesh_queue = [template_acquisition]
+
+    acquisition = copy.deepcopy(template_acquisition)
+    acquisition["sample_id"] = "GoldGrid_UVO90min"
+    acquisition["priority"] = gold_mesh_queue[-1]["priority"] + 1
+    gold_mesh_queue.append(acquisition)
+
+    ## Adding HOPG to generate some carbon contamination
+    acquisition = copy.deepcopy(template_acquisition)
+    acquisition["sample_id"] = "HOPG"
+    acquisition["sample_angles"] = "20"
+    acquisition["priority"] = gold_mesh_queue[-1]["priority"] + 1
+    gold_mesh_queue.append(acquisition)
 
 
-def open_beam_waxs_photodiode_scans():
+    ## Energy scans on gold mesh grids to assess rate of contamination formation
+    for iteration in np.arange(0, iterations, 1):
+        for acq in gold_mesh_queue:
+            yield from run_acquisitions_single(acquisition=acq, dryrun=False)
 
-    configuraiton_instrument = "WAXSNEXAFS"
 
-    open_beam_queue = [
 
-    {
+
+def open_beam_waxs_photodiode_scans(iterations=1):
+
+    template_acquisition = {
     "sample_id": "OpenBeam",
-    "configuration_instrument": configuraiton_instrument,
+    "configuration_instrument": "WAXSNEXAFS",
     "scan_type": "nexafs",
     "energy_list_parameters": "carbon_NEXAFS",
     "polarizations": [0, 55, 90],
     "cycles": 1,
     "group_name": "Assess PGM contamination",
     "priority": 1,
-    },
+    }
 
-    {
-    "sample_id": "OpenBeam",
-    "configuration_instrument": configuraiton_instrument,
-    "scan_type": "nexafs",
-    "energy_list_parameters": "nitrogen_NEXAFS",
-    "polarizations": [0, 55, 90],
-    "cycles": 1,
-    "group_name": "Assess PGM contamination",
-    "priority": 2,
-    },
+    open_beam_queue = [template_acquisition]
 
-    {
-    "sample_id": "OpenBeam",
-    "configuration_instrument": configuraiton_instrument,
-    "scan_type": "nexafs",
-    "energy_list_parameters": "oxygen_NEXAFS",
-    "polarizations": [0, 55, 90],
-    "cycles": 1,
-    "group_name": "Assess PGM contamination",
-    "priority": 3,
-    },
-
-    {
-    "sample_id": "OpenBeam",
-    "configuration_instrument": configuraiton_instrument,
-    "scan_type": "nexafs",
-    "energy_list_parameters": "fluorine_NEXAFS",
-    "polarizations": [0, 55, 90],
-    "cycles": 1,
-    "group_name": "Assess PGM contamination",
-    "priority": 4,
-    },
-
-    ]
+    for energy_parameters in ["nitrogen_NEXAFS", "oxygen_NEXAFS", "fluorine_NEXAFS"]:
+        acquisition = copy.deepcopy(template_acquisition)
+        acquisition["energy_list_parameters"] = energy_parameters
+        acquisition["priority"] = open_beam_queue[-1]["priority"] + 1
+        open_beam_queue.append(acquisition)
+        
+    
 
     ## Open beam scans to assess beam contamination
     ## Multiple iterations to fill time
-    for iteration in np.arange(0, 1000, 1):
+    for iteration in np.arange(0, iterations, 1):
         for acq in open_beam_queue:
             yield from run_acquisitions_single(acquisition=acq, dryrun=False)
 
@@ -515,4 +543,85 @@ def WAXS_camera_position_offset_scans():
                                 group_name="Assess WAXS camera quadrants",
                                 sample="SBA15",
                                 )
+
+
+def WAXS_camera_flat_field_illumination_Al_foil():
+
+    ## Load WAXSNEXAFS with camera retracted, but I want all the SDD and other parameters to be as if it were with camera in beam path because I am taking camera images.
+    yield from load_configuration("WAXSNEXAFS")
+    mdToUpdate = {
+            "RSoXS_Config": "WAXSNEXAFS",
+            "RSoXS_Main_DET": "WAXS",
+            "RSoXS_WAXS_SDD": 34.34,  # "RSoXS_WAXS_SDD": 39.19,
+            "RSoXS_WAXS_BCX": 467.5,
+            "RSoXS_WAXS_BCY": 513.4,
+            "WAXS_Mask": [(367, 545), (406, 578), (880, 0), (810, 0)],
+            "RSoXS_SAXS_SDD": None,
+            "RSoXS_SAXS_BCX": None,
+            "RSoXS_SAXS_BCY": None,
+        }
+    bl.md.update(mdToUpdate)
+
+
+    yield from load_samp("AlFoil")
+    yield from bps.mv(manipulator.r, -70) ## I don't want to do rotate_now because I want it to rotate in the other direction
+    add_current_position_as_sample(name="AlFoil", sample_id="AlFoil")
+
+    yield from set_polarization(0)
+
+    ## Run at 800, 900, and 1000 eV
+    ## Running 50 repeat exposures at each energy at 1 s and 5 s exposure time each.
+    energy_parameters = (800, 100, 1000)
+    yield from nbs_energy_scan(
+                        *energy_parameters,
+                        use_2d_detector=True, 
+                        dwell=1,
+                        n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                        group_name="Assess WAXS camera quadrants using flat-field illumination",
+                        sample="AlFoil",
+                        )
+    yield from nbs_energy_scan(
+                        *energy_parameters,
+                        use_2d_detector=True, 
+                        dwell=5,
+                        n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                        group_name="Assess WAXS camera quadrants using flat-field illumination",
+                        sample="AlFoil",
+                        )
+    
+
+
+
+def WAXS_camera_flat_field_illumination_SiN():
+
+    yield from load_configuration("WAXS")
+
+    yield from load_samp("SiN_Blank")
+    add_current_position_as_sample(name="SiN_Blank", sample_id="SiN_Blank")
+
+    ## Trying different polarizations in case SBA-15 has some anisotropy
+    for polarization in [0, 90, 45, 135]:
+        yield from set_polarization(polarization)
+
+        ## Run an energy scan going from 100 eV to 1000 eV in 100 eV increments
+        ## Running 50 repeat exposures at each energy at 1 s exposure time each.
+        energy_parameters = (440, 120, 560)
+        yield from nbs_energy_scan(
+                            *energy_parameters,
+                            use_2d_detector=True, 
+                            dwell=1,
+                            n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                            group_name="Assess WAXS camera quadrants using flat-field illumination",
+                            sample="SiN_Blank",
+                            )
+        yield from nbs_energy_scan(
+                            *energy_parameters,
+                            use_2d_detector=True, 
+                            dwell=5,
+                            n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                            group_name="Assess WAXS camera quadrants using flat-field illumination",
+                            sample="SiN_Blank",
+                            )
+
+
 
