@@ -284,20 +284,13 @@ myQueue = [
 
 def commissioning_scans_20250808():
 
-    yield from I0_mesh_vertical_profile_energy_scan()
-
-    yield from gold_mesh_contamination_kinetics(iterations=1)
-    yield from open_beam_waxs_photodiode_scans(iterations=1)
-
-    yield from WAXS_camera_flat_field_illumination_Al_foil()
-
-    yield from gold_mesh_contamination_kinetics(iterations=1)
-    yield from open_beam_waxs_photodiode_scans(iterations=1)
+    
+    yield from gold_mesh_contamination_kinetics(iterations=10)
 
     yield from WAXS_camera_flat_field_illumination_SiN()
 
     for count in np.arange(0, 1000, 1):
-        yield from gold_mesh_contamination_kinetics(iterations=1)
+        yield from gold_mesh_contamination_kinetics(iterations=10)
         yield from open_beam_waxs_photodiode_scans(iterations=1)
     
     
@@ -463,7 +456,7 @@ def gold_mesh_contamination_kinetics(iterations=1):
     ## Adding HOPG to generate some carbon contamination
     acquisition = copy.deepcopy(template_acquisition)
     acquisition["sample_id"] = "HOPG"
-    acquisition["sample_angles"] = "20"
+    acquisition["sample_angles"] = [20]
     acquisition["priority"] = gold_mesh_queue[-1]["priority"] + 1
     gold_mesh_queue.append(acquisition)
 
@@ -533,7 +526,7 @@ def WAXS_camera_position_offset_scans():
             yield from bps.mv(Det_W, waxs_detector_position)
 
             ## Run an energy scan going from 100 eV to 1000 eV in 100 eV increments
-            ## Running 50 repeat exposures at each energy at 1 s exposure time each.
+            ## Running 50 repeat exposures at each energy at 0.1 s exposure time each.
             energy_parameters = (100, 100, 1000)
             yield from nbs_energy_scan(
                                 *energy_parameters,

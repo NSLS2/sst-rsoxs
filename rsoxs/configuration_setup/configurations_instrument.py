@@ -35,6 +35,7 @@ GLOBAL_CONFIGURATION_DICT = GLOBAL_USER_STATUS.request_status_dict("RSoXS_Config
 
 
 def load_configuration(configuration_name):
+    print("Loading configuration: " + str(configuration_name))
     yield from move_motors(configuration_name)
 
     if "NEXAFS" in configuration_name:
