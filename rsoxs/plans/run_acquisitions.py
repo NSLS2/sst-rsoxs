@@ -142,7 +142,7 @@ def run_acquisitions_single(
                     if acquisition["scan_type"]=="nexafs": use_2D_detector = False
                     if acquisition["scan_type"]=="rsoxs": use_2D_detector = True
                     energyParameters = acquisition["energy_list_parameters"]
-                    if isinstance(energyParameters, str): energyParameters = energyListParameters[energyParameters]
+                    if isinstance(energyParameters, str): energyParameters = energy_list_parameters[energyParameters]
                     
                     ## If cycles = 0, then just run one sweep in ascending energy
                     if acquisition["cycles"] == 0: 
@@ -152,7 +152,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                     
                     ## If cycles is an integer > 0, then run pairs of sweeps going in ascending then descending order of energy
@@ -164,7 +163,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                             yield from nbs_energy_scan(
                                 *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
@@ -172,7 +170,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                     
                     ## TODO: maybe default to cycles = 1?  It would be good practice to have forward and reverse scan to assess reproducibility
