@@ -11,7 +11,7 @@ import datetime
 import re, warnings, httpx
 import uuid
 
-from ..plans.default_energy_parameters import energyListParameters
+from ..plans.default_energy_parameters import energy_list_parameters
 
 
 
@@ -279,6 +279,7 @@ acquisitionParameters_Default = {
     "polarizations": [0],
     "exposure_time": 1,
     "exposures_per_energy": 1,
+    "cycles": 0,
     "sample_angles": [0],
     "spiral_dimensions": None,  ## default for spirals is [0.3, 1.8, 1.8], [step_size, diameter_x, diameter_y], useful if our windows are rectangles, not squares
     "group_name": "Group",
@@ -355,6 +356,12 @@ def sanitizeAcquisition(acquisitionInput):
     parameterName = "exposures_per_energy"
     acquisition[parameterName] = int(acquisition[parameterName])
 
+    parameter_name = "cycles"
+    if acquisition[parameter_name] < 0: raise ValueError(str(parameter_name) + " must be a positive integer.")
+    ## Spreadsheet will default to float value, so we have to check for both int and float and then convert float to int.
+    if not isinstance(acquisition[parameter_name], (int, float)): raise ValueError(str(parameter_name) + " must be a positive integer.")
+    acquisition[parameter_name] = int(acquisition[parameter_name])
+
     parameterName = "priority"
     if not isinstance(acquisition[parameterName], (int, float)): raise TypeError(str(parameterName) + " must be an integer.")
     
@@ -421,7 +428,7 @@ def sanitizeEnergyScan(acquisitionInput):
             0,
         )
     if isinstance(acquisition[parameterName], str):
-        if acquisition[parameterName] not in list(energyListParameters.keys()):
+        if acquisition[parameterName] not in list(energy_list_parameters.keys()):
             raise ValueError("Please enter valid energy plan.")
 
     return acquisition

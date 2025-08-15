@@ -14,8 +14,6 @@ import uuid
 from nbs_bl.devices.sampleholders import SampleHolderBase
 from nbs_bl.hw import manipulator
 
-from ..plans.default_energy_parameters import energyListParameters
-
 from .configuration_load_save_sanitize import (
     load_configuration_spreadsheet_local, 
     save_configuration_spreadsheet_local,
