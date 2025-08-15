@@ -152,6 +152,7 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
+                                sample=acquisition["sample_id"],
                                 )
                     
                     ## If cycles is an integer > 0, then run pairs of sweeps going in ascending then descending order of energy
@@ -163,6 +164,7 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
+                                sample=acquisition["sample_id"],
                                 )
                             yield from nbs_energy_scan(
                                 *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
@@ -170,6 +172,7 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
+                                sample=acquisition["sample_id"],
                                 )
                     
                     ## TODO: maybe default to cycles = 1?  It would be good practice to have forward and reverse scan to assess reproducibility
