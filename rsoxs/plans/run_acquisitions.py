@@ -141,8 +141,8 @@ def run_acquisitions_single(
                 if acquisition["scan_type"] in ("nexafs", "rsoxs"):
                     if acquisition["scan_type"]=="nexafs": use_2D_detector = False
                     if acquisition["scan_type"]=="rsoxs": use_2D_detector = True
-                    energyParameters = acquisition["energy_list_parameters"]
-                    if isinstance(energyParameters, str): energyParameters = energy_list_parameters[energyParameters]
+                    energy_parameters = acquisition["energy_list_parameters"]
+                    if isinstance(energy_parameters, str): energy_parameters = energy_list_parameters[energy_parameters]
                     
                     ## If cycles = 0, then just run one sweep in ascending energy
                     if acquisition["cycles"] == 0: 
