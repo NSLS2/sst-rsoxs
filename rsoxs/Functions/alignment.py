@@ -303,10 +303,10 @@ def get_sample_dict(acq=[], locations=None):
         locations = get_sample_location()
     sample_name = RE.md["sample_name"]
     sample_priority = RE.md["sample_priority"]
-    sample_desc = RE.md["sample_desc"]
+    #sample_desc = RE.md["sample_desc"]
     sample_id = RE.md["sample_id"]
-    sample_set = RE.md["sample_set"]
-    sample_date = RE.md["sample_date"]
+    #sample_set = RE.md["sample_set"]
+    #sample_date = RE.md["sample_date"]
     project_name = RE.md["project_name"]
     #proposal_id = RE.md["proposal_id"]
     #saf_id = RE.md["SAF"]
@@ -314,40 +314,40 @@ def get_sample_dict(acq=[], locations=None):
     project_desc = RE.md["project_desc"]
     composition = RE.md["composition"]
     bar_loc = RE.md["bar_loc"]
-    density = RE.md["density"]
+    #density = RE.md["density"]
     grazing = RE.md["grazing"]
     bar_spot = RE.md["bar_spot"]
     front = RE.md["front"]
     height = RE.md["height"]
     angle = RE.md["angle"]
-    components = RE.md["components"]
-    thickness = RE.md["thickness"]
-    sample_state = RE.md["sample_state"]
+    #components = RE.md["components"]
+    #thickness = RE.md["thickness"]
+    #sample_state = RE.md["sample_state"]
     notes = RE.md["notes"]
 
     return {
         "sample_name": sample_name,
-        "sample_desc": sample_desc,
+        #"sample_desc": sample_desc,
         "sample_id": sample_id,
         "sample_priority": sample_priority,
         #"proposal_id": proposal_id,
         #"SAF": saf_id,
         "institution": institution,
-        "sample_set": sample_set,
-        "sample_date": sample_date,
+        #"sample_set": sample_set,
+        #"sample_date": sample_date,
         "project_name": project_name,
         "project_desc": project_desc,
         "composition": composition,
         "bar_loc": bar_loc,
-        "density": density,
+        #"density": density,
         "grazing": grazing,
         "bar_spot": bar_spot,
         "front": front,
         "height": height,
         "angle": angle,
-        "components": components,
-        "thickness": thickness,
-        "sample_state": sample_state,
+        #"components": components,
+        #"thickness": thickness,
+        #"sample_state": sample_state,
         "notes": notes,
         "location": locations,
         "acquisitions": acq,

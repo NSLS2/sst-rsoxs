@@ -181,6 +181,7 @@ class RSOXSGreatEyesDetector(SingleTriggerV33, GreatEyesDetector):
         self.useshutter = False
         self.cam.sync.set(0).wait()
         self.cam.shutter_mode.set(0).wait()
+
     def sim_mode_off(self):
         self.useshutter = True
         self.cam.sync.set(1).wait()
@@ -220,17 +221,16 @@ class RSOXSGreatEyesDetector(SingleTriggerV33, GreatEyesDetector):
             self.setup_cam()
         return super().trigger(*args, **kwargs)
 
-    
     def describe(self):
         res = super().describe()
         updates = {}
         updates["dtype_str"] = "<u4"
         # This will only work if we are 100% confident that we will always have 4D data when using this 3D detector.
-        updates["chunks"] = (1, 1, -1, -1) # TODO: How to do this at a plan level to ensure num dims correct
-        res['Wide Angle CCD Detector_image'].update(updates)
+        updates["chunks"] = (1, 1, -1, -1)  # TODO: How to do this at a plan level to ensure num dims correct
+        res["Wide Angle CCD Detector_image"].update(updates)
         print(res)
         return res
-    
+
     def skinnystage(self, *args, **kwargs):
         yield Msg("stage", super())
 
@@ -286,8 +286,7 @@ class RSOXSGreatEyesDetector(SingleTriggerV33, GreatEyesDetector):
     #        self.cam.
     def set_temp_plan(self, degc):
         yield from bps.mv(self.cam.temperature, degc, self.cam.enable_cooling, 1)
-    
-    
+
     def cooling_off_plan(self):
         yield from bps.mv(self.cam.enable_cooling, 0)
 
@@ -451,7 +450,7 @@ class SimGreatEyesCam(Device):
 # In [3]: suitcase.nxsas.export(h.documents(), directory=".")
 
 
-class PatchedSynSignalWithRegistry(SynSignalWithRegistry, Device):
+class PatchedSynSignalWithRegistry(Device, SynSignalWithRegistry):
     def trigger(self):
         "Promptly return  a status object that will be marked 'done' after self.exposure_time seconds."
         super().trigger()  # returns NullStatus, which is "done" immediately -- let's do better
