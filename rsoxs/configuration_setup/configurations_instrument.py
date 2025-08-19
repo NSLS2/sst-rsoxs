@@ -25,7 +25,7 @@ from nbs_bl.hw import (
     sam_Y,
     sam_X,
     TEMZ,
-    mir4OLD,
+    #mir4OLD,
     # dm7
 )
 
@@ -110,14 +110,10 @@ default_configurations = {
         {"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
         {"motor": BeamStopW, "position": 3, "order": 1},
         {"motor": BeamStopS, "position": 3, "order": 1},
-        {
-            "motor": sam_Y,
-            "position": 345,
-            "order": 1,
-        },  ## TODO: Might need to remove if issue with gate valve closed.  maybe make separate configuration, solid_sample_out
-        {"motor": sam_X, "position": 0, "order": 1},
-        {"motor": sam_Z, "position": 0, "order": 1},
-        {"motor": sam_Th, "position": 0, "order": 1},
+        #{"motor": sam_Y, "position": 345, "order": 1},  ## TODO: Might need to remove if issue with gate valve closed.  maybe make separate configuration, solid_sample_out
+        #{"motor": sam_X, "position": 0, "order": 1},
+        #{"motor": sam_Z, "position": 0, "order": 1},
+        #{"motor": sam_Th, "position": 0, "order": 1},
         {"motor": TEMZ, "position": 1, "order": 1},
     ],
     "MirrorConfiguration_RSoXS": [
