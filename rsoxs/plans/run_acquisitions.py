@@ -94,9 +94,7 @@ def run_acquisitions_single(
     if acquisition[parameter] is not None:
         print("Loading sample: " + str(acquisition[parameter]))
         if dryrun == False: 
-            ## Don't move motors if I don't have beam.
-            if acquisition["configuration_instrument"] == "NoBeam": print("Not moving motors.")
-            else: yield from load_samp(acquisition[parameter]) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
+            yield from load_samp(acquisition[parameter]) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
         
 
     ## TODO: set temperature if needed, but this is lowest priority
@@ -105,8 +103,7 @@ def run_acquisitions_single(
         print("Rotating to angle: " + str(sampleAngle))
         ## TODO: Requires spots to be picked from image, so I have to comment when I don't have beam
         if dryrun == False: 
-            if acquisition["configuration_instrument"] == "NoBeam": print("Not moving motors.")
-            else: yield from rotate_now(sampleAngle) ## TODO: What is the difference between rotate_sample and rotate_now?
+            yield from rotate_now(sampleAngle) ## TODO: What is the difference between rotate_sample and rotate_now?
         
         for indexPolarization, polarization in enumerate(acquisition["polarizations"]):
             print("Setting polarization: " + str(polarization))
