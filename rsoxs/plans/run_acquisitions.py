@@ -94,9 +94,7 @@ def run_acquisitions_single(
     if acquisition[parameter] is not None:
         print("Loading sample: " + str(acquisition[parameter]))
         if dryrun == False: 
-            ## Don't move motors if I don't have beam.
-            if acquisition["configuration_instrument"] == "NoBeam": print("Not moving motors.")
-            else: yield from load_samp(acquisition[parameter]) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
+            yield from load_samp(acquisition[parameter]) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
         
 
     ## TODO: set temperature if needed, but this is lowest priority
@@ -105,8 +103,7 @@ def run_acquisitions_single(
         print("Rotating to angle: " + str(sampleAngle))
         ## TODO: Requires spots to be picked from image, so I have to comment when I don't have beam
         if dryrun == False: 
-            if acquisition["configuration_instrument"] == "NoBeam": print("Not moving motors.")
-            else: yield from rotate_now(sampleAngle) ## TODO: What is the difference between rotate_sample and rotate_now?
+            yield from rotate_now(sampleAngle) ## TODO: What is the difference between rotate_sample and rotate_now?
         
         for indexPolarization, polarization in enumerate(acquisition["polarizations"]):
             print("Setting polarization: " + str(polarization))
@@ -117,7 +114,6 @@ def run_acquisitions_single(
                 else: yield from set_polarization(polarization)
             
             print("Running scan: " + str(acquisition["scan_type"]))
-            add_current_position_as_sample(name=acquisition[parameter], sample_id=acquisition[parameter]) ## Probably temporary until we figure have this as part of load_samp.  Adding here so all angle rotations are included.
             if dryrun == False or updateAcquireStatusDuringDryRun == True:
                 timeStamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 acquisition["acquire_status"] = "Started " + str(timeStamp)
@@ -134,7 +130,6 @@ def run_acquisitions_single(
                     yield from nbs_count(num=acquisition["exposures_per_energy"], 
                                          use_2d_detector=use_2D_detector, 
                                          dwell=acquisition["exposure_time"],
-                                         sample=acquisition["sample_id"],
                                          )
                 
                 if acquisition["scan_type"] == "spiral":
@@ -150,7 +145,6 @@ def run_acquisitions_single(
                         widthY=acquisition["spiral_dimensions"][2],
                         n_exposures=acquisition["exposures_per_energy"], 
                         dwell=acquisition["exposure_time"],
-                        sample=acquisition["sample_id"],
                         )
 
                 if acquisition["scan_type"] in ("nexafs", "rsoxs"):
@@ -167,7 +161,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                     
                     ## If cycles is an integer > 0, then run pairs of sweeps going in ascending then descending order of energy
@@ -179,7 +172,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                             yield from nbs_energy_scan(
                                 *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
@@ -187,7 +179,6 @@ def run_acquisitions_single(
                                 dwell=acquisition["exposure_time"],
                                 n_exposures=acquisition["exposures_per_energy"], 
                                 group_name=acquisition["group_name"],
-                                sample=acquisition["sample_id"],
                                 )
                     
                     ## TODO: maybe default to cycles = 1?  It would be good practice to have forward and reverse scan to assess reproducibility

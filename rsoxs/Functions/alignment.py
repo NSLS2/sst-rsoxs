@@ -63,21 +63,17 @@ run_report(__file__)
 
 
 def load_samp(
-        num_or_id, 
-        #sample_id, 
-        sim_mode=False):
+        sample_id_or_index, 
+        ):
     """
     move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
 
-    :param sam_dict: sample dictionary containing all metadata and sample location
-    :return:
     """
-    ## Eliot's old code
-    sam_dict = samp_dict_from_id_or_num(num_or_id)
-    yield from load_sample(sam_dict, sim_mode)
+    
+    sample_id, sample_index = get_sample_id_and_index(sample_id_or_index=sample_id_or_index)
+    yield from move_sample(sample_id)
+    RE.md.update(rsoxs_config["bar"][sample_index])
 
-    ## Jamie's function
-    # yield from move_sample(sample_id)
 
 def get_sample_id_and_index(sample_id_or_index):
     """
@@ -129,7 +125,29 @@ def duplicate_sample(sample_index, name_suffix):
 
 
 
+def rotate_now(theta, force=False):
+    if theta is not None:
+        
+        ## Identify the current sample and get its metadata
+        sample_id_current = RE.md["sample_id"] ## TODO: would like a better way to do this
+        sample_id, sample_index = get_sample_id_and_index(sample_id_current)
+        sample_dictionary_old = copy.deepcopy(rsoxs_config["bar"][sample_index])
 
+        ## Set new angle, rotate to the angle, update rsoxs_config
+        sample_dictionary_new = copy.deepcopy(sample_dictionary_old)
+        sample_dictionary_new["angle"] = theta
+        rotate_sample(sample_dictionary_new, force)
+        rsoxs_config["bar"][sample_index] = sample_dictionary_new
+        sync_rsoxs_config_to_nbs_manipulator()
+
+        ## Load the sample with new metadata
+        yield from load_samp(sample_index)
+
+        ## TODO: Come up with a better way to set the angle in the metadata.
+        ## As is, it will persistently store the new angle we rotated to when ideally I would like to restore the old sample dictionary.
+        ## For spreadsheet runs, it's fine because sample angle defaults to 0 or is explicitly defined.
+        ## But for manual rotations, we will have to rotate back explicitly.
+        ## TODO: Change spreadsheet workflow so that angle is only defined in acquisitions, not samples tab.  Have all angles default to normal incidence, as that is how I align the bar anyways.
 
 
 
@@ -354,6 +372,7 @@ def get_sample_dict(acq=[], locations=None):
     }
 
 
+## Used to be used with load_samp
 def load_sample(sam_dict, sim_mode=False):
     """
     move to a sample location and load the metadata with the sample information
@@ -529,12 +548,7 @@ def samxscan():
 
 
 
-def rotate_now(theta, force=False):
-    if theta is not None:
-        samp = get_sample_dict()
-        samp["angle"] = theta
-        rotate_sample(samp, force)
-        yield from load_sample(samp)
+
 
 
 def jog_samp_zoff(id_or_num, jog_val, write_default=True, move=True):
