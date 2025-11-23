@@ -279,6 +279,18 @@ myQueue = [
 ## Custom scripts for commissioning #################################
 
 
+
+
+def commissioning_scans_20251123():
+
+    
+    yield from HOPG_energy_resolution_series()
+
+    yield from open_beam_waxs_photodiode_scans(iterations=1)
+        
+    
+
+
 def cdsaxs_20250914():
     yield from do_cdsaxs_position_sweep()
     yield from open_beam_waxs_photodiode_scans(iterations=1000)
@@ -374,17 +386,6 @@ def TEY_20250914():
 
 
 
-
-def commissioning_scans_20250913():
-
-    
-    #yield from HOPG_energy_resolution_series()
-
-    for count in np.arange(0, 1000, 1):
-        yield from open_beam_waxs_photodiode_scans(iterations=1)
-        yield from gold_mesh_contamination_kinetics(iterations=1)
-        
-    
 
         
 
@@ -592,7 +593,7 @@ def open_beam_waxs_photodiode_scans(iterations=1):
     "configuration_instrument": "WAXSNEXAFS",
     "scan_type": "nexafs",
     "energy_list_parameters": "carbon_NEXAFS",
-    "polarizations": [0, 90, 45, 135], 
+    "polarizations": [0, 90], #"polarizations": [0, 90, 45, 135], 
     "cycles": 1,
     "group_name": "Assess PGM contamination",
     "priority": 1,
@@ -671,6 +672,8 @@ def HOPG_energy_resolution_series():
         slits3.hsize, 10,
         )
 
+    slit1_vsizes = [0.01, 0.02, 0.04, 0.1, 0.2, 0.4]
+    """
     slit1_vsizes = np.concatenate(
         (
             np.arange(0.01, 0.1, 0.005),
@@ -678,6 +681,7 @@ def HOPG_energy_resolution_series():
             np.arange(1, 10, 0.5),
         )
     )
+    """
     for slit1_vsize in slit1_vsizes:
         yield from bps.mv(slits1.vsize, slit1_vsize)
         yield from nbs_energy_scan(
