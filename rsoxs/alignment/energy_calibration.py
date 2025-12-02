@@ -97,7 +97,7 @@ def scan_pgm_angles(
     diffraction_orders = [1, 1, 1, 1, 1], #diffraction_orders = np.full(shape = 5, fill_value = 1),
     sample_ids = ["HOPG", "HOPG", "HOPG", "HOPG", "HOPG"], #sample_ids = np.full(5, "HOPG"),
     sample_angles = [20, 20, 20, 20, 20],#sample_angles = np.full(shape = 5, fill_value = 20),
-    radius_search_window = 0.8,
+    radius_search_window = 0.08,
     number_points = 100,
 ):
     """
