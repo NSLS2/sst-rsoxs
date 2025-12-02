@@ -98,96 +98,96 @@ def scan_pgm_angles_open_beam(
     number_points = 100,
 ):
 
-"""
-Similar to scan_pgm_angles, but only running the open-beam portion of it to mimic scans run by the calibrate_pgm_offsets function.
-"""
+    """
+    Similar to scan_pgm_angles, but only running the open-beam portion of it to mimic scans run by the calibrate_pgm_offsets function.
+    """
 
 
- for scan in ["reference"]:
-        for (
-             polarization, 
-             energy,
-             cff,
-             diffraction_order,
-             sample_id,
-             sample_angle,
-        ) in zip(
-                 polarizations, 
-                 energies,
-                 cffs,
-                 diffraction_orders,
-                 sample_ids,
-                 sample_angles,
-        ):
-            ## Load beamline configuration and sample
-            yield from bps.mv(en.polarization, polarization)
-            yield from bps.mv(en, energy)
-            m2_angle, pgm_angle = get_mirror_grating_angles(en_eV = energy, 
-                                                            cff = cff, 
-                                                            k_invmm = lines_per_mm_pgm, 
-                                                            m = diffraction_order)
-            yield from bps.mv(grating.velocity, 0.1, mirror2.velocity, 0.1)
-            yield from bps.sleep(1)
-            yield from bps.mv(grating, pgm_angle, mirror2, m2_angle)
-            yield from bps.sleep(1)
-            print(
-                  "Set beam polarization = " + str(polarization) + "°, "
-                  + "energy = " + str(energy) + " eV, "
-                  + "M2 angle = " + str(m2_angle) + "°, "
-                  + "PGM angle = " + str(pgm_angle) + "°, "
-                  + "CFF = " + str(cff) + ", "
-                  + "diffraction order = " + str(diffraction_order) + ", "
-                  + "for PGM with " + str(lines_per_mm_pgm) + " lines per mm."
-           )
+    for scan in ["reference"]:
+            for (
+                polarization, 
+                energy,
+                cff,
+                diffraction_order,
+                sample_id,
+                sample_angle,
+            ) in zip(
+                    polarizations, 
+                    energies,
+                    cffs,
+                    diffraction_orders,
+                    sample_ids,
+                    sample_angles,
+            ):
+                ## Load beamline configuration and sample
+                yield from bps.mv(en.polarization, polarization)
+                yield from bps.mv(en, energy)
+                m2_angle, pgm_angle = get_mirror_grating_angles(en_eV = energy, 
+                                                                cff = cff, 
+                                                                k_invmm = lines_per_mm_pgm, 
+                                                                m = diffraction_order)
+                yield from bps.mv(grating.velocity, 0.1, mirror2.velocity, 0.1)
+                yield from bps.sleep(1)
+                yield from bps.mv(grating, pgm_angle, mirror2, m2_angle)
+                yield from bps.sleep(1)
+                print(
+                    "Set beam polarization = " + str(polarization) + "°, "
+                    + "energy = " + str(energy) + " eV, "
+                    + "M2 angle = " + str(m2_angle) + "°, "
+                    + "PGM angle = " + str(pgm_angle) + "°, "
+                    + "CFF = " + str(cff) + ", "
+                    + "diffraction order = " + str(diffraction_order) + ", "
+                    + "for PGM with " + str(lines_per_mm_pgm) + " lines per mm."
+            )
 
-            ## Generate list of motor positions
-            ## Ad hoc list of PGM angles to scan based on what was run during calibrate_pgm_offsets 20251201
-            if cff > 1.44 and cff < 1.46:
-		            grating_angles_to_scan = np.array([-3.63514117, -3.63497026, -3.63480355, -3.63467924, -3.63452837,
-            									       -3.63439711, -3.63428617, -3.63417645, -3.63399415, -3.63387483,
-            									       -3.63370501, -3.63357371, -3.63346538, -3.63324208, -3.63311979,
-            									       -3.63300885, -3.63286154, -3.63269948, -3.63255347, -3.63240687,
-            									       -3.63228579, -3.63213521, -3.63203496, -3.63185743, -3.63174373,
-            									       -3.63158946, -3.63146944, -3.63131714, -3.63117439, -3.6310161 ,
-            									       -3.63088274, -3.63070211, -3.63060585, -3.63041797, -3.63024543,
-            									       -3.63009967, -3.62998299, -3.62983719, -3.62965542, -3.62955702,
-            									       -3.6294095 , -3.62926881, -3.62912393, -3.6290277 , -3.62886082,
-            									       -3.62877109])
-            if cff > 1.49 and cff < 1.51:
-                    grating_angles_to_scan = np.array([-3.53136105, -3.53111777, -3.53099497, -3.53083488, -3.53074695,
-                                                       -3.53055115, -3.53043879, -3.53032354, -3.53017564, -3.53003151,
-                                                       -3.52983156, -3.52969393, -3.52947232, -3.52939235, -3.52920426,
-                                                       -3.52904379, -3.52891194, -3.52875759, -3.52864297, -3.52852336,
-                                                       -3.52835207, -3.52824055, -3.52808297, -3.52795951, -3.52785184,
-                                                       -3.5277029 , -3.52754649, -3.52737474, -3.52724969, -3.5271284 ,
-                                                       -3.52700162, -3.52685746, -3.52671911, -3.52659326, -3.52643589,
-                                                       -3.52630794, -3.52616444, -3.52603733, -3.52586282, -3.52573583,
-                                                       -3.52563542, -3.52545294, -3.5253687 , -3.52524319, -3.52506826,
-                                                       -3.52499743])
-            if cff > 1.54 and cff < 1.56:
-                    grating_angles_to_scan = np.array([-3.44419616, -3.44401201, -3.44388193, -3.44374254, -3.44360989,
-                                                       -3.44342377, -3.4433063 , -3.44311787, -3.44302865, -3.44288104,
-                                                       -3.44271026, -3.44255214, -3.44242503, -3.44229561, -3.44215924,
-                                                       -3.44202236, -3.44188272, -3.44175623, -3.44158931, -3.4414767 ,
-                                                       -3.44133383, -3.44118744, -3.44102315, -3.44092018, -3.44080124,
-                                                       -3.44062459, -3.44052569, -3.44035767, -3.44024213, -3.44010303,
-                                                       -3.43995132, -3.43983544, -3.43972631, -3.43958101, -3.43940536,
-                                                       -3.43927377, -3.43910978, -3.43900333, -3.43887374, -3.43871088,
-                                                       -3.43857606, -3.43843478, -3.43826882, -3.43814435, -3.43801791,
-                                                       -3.43786829])
-            
-            
+                ## Generate list of motor positions
+                ## Ad hoc list of PGM angles to scan based on what was run during calibrate_pgm_offsets 20251201
+                if cff > 1.44 and cff < 1.46:
+                        grating_angles_to_scan = np.array([-3.63514117, -3.63497026, -3.63480355, -3.63467924, -3.63452837,
+                                                        -3.63439711, -3.63428617, -3.63417645, -3.63399415, -3.63387483,
+                                                        -3.63370501, -3.63357371, -3.63346538, -3.63324208, -3.63311979,
+                                                        -3.63300885, -3.63286154, -3.63269948, -3.63255347, -3.63240687,
+                                                        -3.63228579, -3.63213521, -3.63203496, -3.63185743, -3.63174373,
+                                                        -3.63158946, -3.63146944, -3.63131714, -3.63117439, -3.6310161 ,
+                                                        -3.63088274, -3.63070211, -3.63060585, -3.63041797, -3.63024543,
+                                                        -3.63009967, -3.62998299, -3.62983719, -3.62965542, -3.62955702,
+                                                        -3.6294095 , -3.62926881, -3.62912393, -3.6290277 , -3.62886082,
+                                                        -3.62877109])
+                if cff > 1.49 and cff < 1.51:
+                        grating_angles_to_scan = np.array([-3.53136105, -3.53111777, -3.53099497, -3.53083488, -3.53074695,
+                                                        -3.53055115, -3.53043879, -3.53032354, -3.53017564, -3.53003151,
+                                                        -3.52983156, -3.52969393, -3.52947232, -3.52939235, -3.52920426,
+                                                        -3.52904379, -3.52891194, -3.52875759, -3.52864297, -3.52852336,
+                                                        -3.52835207, -3.52824055, -3.52808297, -3.52795951, -3.52785184,
+                                                        -3.5277029 , -3.52754649, -3.52737474, -3.52724969, -3.5271284 ,
+                                                        -3.52700162, -3.52685746, -3.52671911, -3.52659326, -3.52643589,
+                                                        -3.52630794, -3.52616444, -3.52603733, -3.52586282, -3.52573583,
+                                                        -3.52563542, -3.52545294, -3.5253687 , -3.52524319, -3.52506826,
+                                                        -3.52499743])
+                if cff > 1.54 and cff < 1.56:
+                        grating_angles_to_scan = np.array([-3.44419616, -3.44401201, -3.44388193, -3.44374254, -3.44360989,
+                                                        -3.44342377, -3.4433063 , -3.44311787, -3.44302865, -3.44288104,
+                                                        -3.44271026, -3.44255214, -3.44242503, -3.44229561, -3.44215924,
+                                                        -3.44202236, -3.44188272, -3.44175623, -3.44158931, -3.4414767 ,
+                                                        -3.44133383, -3.44118744, -3.44102315, -3.44092018, -3.44080124,
+                                                        -3.44062459, -3.44052569, -3.44035767, -3.44024213, -3.44010303,
+                                                        -3.43995132, -3.43983544, -3.43972631, -3.43958101, -3.43940536,
+                                                        -3.43927377, -3.43910978, -3.43900333, -3.43887374, -3.43871088,
+                                                        -3.43857606, -3.43843478, -3.43826882, -3.43814435, -3.43801791,
+                                                        -3.43786829])
+                
+                
 
-            if scan == "sample":
-                yield from load_samp(sample_id)
-                yield from rotate_now(sample_angle)
-                print("Loaded sample_id = " + str(sample_id) + ", sample angle = " + str(sample_angle))
-            if scan == "reference":
-                yield from load_samp("OpenBeam")
-                print("Loaded sample_id = OpenBeam")
+                if scan == "sample":
+                    yield from load_samp(sample_id)
+                    yield from rotate_now(sample_angle)
+                    print("Loaded sample_id = " + str(sample_id) + ", sample angle = " + str(sample_angle))
+                if scan == "reference":
+                    yield from load_samp("OpenBeam")
+                    print("Loaded sample_id = OpenBeam")
 
-            ## Perform scan
-            yield from nbs_list_scan(grating, grating_angles_to_scan)
+                ## Perform scan
+                yield from nbs_list_scan(grating, grating_angles_to_scan)
 
 
 
