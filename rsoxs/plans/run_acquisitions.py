@@ -283,7 +283,7 @@ myQueue = [
 
 
 
-def commissioning_scans_20251123():
+def commissioning_scans_20251201():
 
     
     yield from HOPG_energy_resolution_series()
@@ -295,6 +295,10 @@ def commissioning_scans_20251123():
     yield from count_beam_stability()
 
     yield from zero_order_scans()
+
+    yield from WAXS_camera_position_offset_scans()
+
+    yield from open_beam_waxs_photodiode_scans(iterations=1000)
         
     
 
@@ -764,6 +768,8 @@ def HOPG_energy_resolution_series():
     This series is especially helpful when selecting slits1.vsize to balance beam flux and energy resolution.
     Moreover, it should be run routinely during commissioning to assess energy resolution and adjust energy calibration if needed.
     """
+
+    print("Starting HOPG energy resolution series")
     
     ## Start and end at safe configuraiton like WAXSNEXAFS
     yield from load_configuration("WAXSNEXAFS")
@@ -814,7 +820,7 @@ def HOPG_energy_resolution_series():
 
 def WAXS_camera_position_offset_scans():
 
-
+    print("Starting WAXS camera offset scans")
 
     ## SBA-15 scans with WAXS camera moved to different positions
     ## To decouple sample features from camera quadrant boundaries
@@ -822,21 +828,21 @@ def WAXS_camera_position_offset_scans():
 
     ## Load SBA-15 sample.  This sample will stay in the same position throughout all scans.
     yield from load_samp("SBA15")
-    add_current_position_as_sample(name="SBA15", sample_id="SBA15")
-
+    
     ## Trying different polarizations in case SBA-15 has some anisotropy
     #for polarization in [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180]:
-    for polarization in [0, 90, 180, 45, 135, 15, 30, 60, 75, 105, 120, 150, 165]:
+    #for polarization in [0, 90, 180, 45, 135, 15, 30, 60, 75, 105, 120, 150, 165]:
+    for polarization in [0, 90, 45, 135]:
         yield from set_polarization(polarization)
 
         ## Iterate through different WAXS camera positions
         ## The WAXS camera comes in diagonally, so it would move both to the side and further from the sample.
-        for waxs_detector_position in [2, -20, -40]:
+        for waxs_detector_position in np.arange(2, -20, -2):
             yield from bps.mv(Det_W, waxs_detector_position)
 
             ## Run an energy scan going from 100 eV to 1000 eV in 100 eV increments
             ## Running 50 repeat exposures at each energy at 0.1 s exposure time each.
-            energy_parameters = (100, 100, 1000)
+            energy_parameters = (200, 91.65, 291.65, 8.35, 300, 100, 1300)
             yield from nbs_energy_scan(
                                 *energy_parameters,
                                 use_2d_detector=True, 
