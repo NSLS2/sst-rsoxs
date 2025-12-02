@@ -10,7 +10,7 @@ from rsoxs.Functions.alignment import (
     rotate_now
     )
 from rsoxs.HW.energy import set_polarization
-from nbs_bl.plans.scans import nbs_count, nbs_energy_scan
+from nbs_bl.plans.scans import nbs_count, nbs_list_scan, nbs_energy_scan
 from ..Functions.energyscancore import cdsaxs_scan
 from ..Functions.rsoxs_plans import do_rsoxs
 from rsoxs.plans.rsoxs import spiral_scan
@@ -21,6 +21,8 @@ from nbs_bl.hw import (
     en,
     mir1,
     fs6_cam,
+    mirror2,
+    grating,
     slitsc,
     slits1,
     izero_y,
@@ -287,8 +289,73 @@ def commissioning_scans_20251123():
     yield from HOPG_energy_resolution_series()
 
     yield from open_beam_waxs_photodiode_scans(iterations=1)
+
+    yield from spirals_WSU()
+
+    yield from count_beam_stability()
+
+    yield from zero_order_scans()
         
     
+
+
+def spirals_WSU():
+
+    print("Starting WSU spirals")
+
+
+    sample_ids = [
+        "PC0",
+        "PC2",
+        "PC4",
+        "BD1-1",
+        "BD2-1",
+        "BD3-1",
+        "blank",
+        "50nmPS",
+    ]
+
+    yield from set_polarization(0)
+    yield from bps.mv(en, 270)
+
+    yield from load_configuration("WAXS")
+
+    for sample_id in sample_ids:
+        yield from load_samp(sample_id)
+
+        yield from spiral_scan(
+                        stepsize=0.3, 
+                        widthX=1.8, 
+                        widthY=1.8,
+                        n_exposures=1, 
+                        dwell=1,
+                        )
+
+
+
+def count_beam_stability():
+    
+    print("Starting counting scans")
+    
+    energies = np.arange(250, 350, 10)
+    exposure_times = np.arange(1, 6, 1)
+
+    yield from set_polarization(0)
+    yield from load_configuration("WAXSNEXAFS")
+    yield from load_samp("OpenBeam")
+
+    for exposure_time in exposure_times:
+        print("Exposure time: " + str(exposure_time))
+        for energy in energies:
+            print("Energy: " + str(energy))
+            yield from bps.mv(en, energy)
+
+            yield from nbs_count(
+                num=100, 
+                use_2d_detector=False, 
+                dwell=exposure_time,
+                                            )
+
 
 
 def cdsaxs_20250914():
@@ -648,6 +715,50 @@ def open_beam_waxs_photodiode_scans_carbon(iterations=1):
 
 
 
+def zero_order_scans():
+    ## Setting energy and polarization so that the EPU is at constant gap and phase
+    yield from bps.mv(en.polarization, 90)
+    yield from bps.mv(en, 291.65)
+    yield from bps.mv(mirror2, -4)
+    yield from bps.mv(grating, -4)
+
+    ## Start and end at safe configuraiton like WAXSNEXAFS
+    yield from load_configuration("WAXSNEXAFS")
+
+    angles_optics = np.arange(-4, -1.3, 0.2)
+
+    for sample_id in ["HOPG_new", "OpenBeam"]:
+        yield from load_samp(sample_id)
+        yield from rotate_now(20)
+
+        for angle_optics in angles_optics:
+            yield from bps.mv(grating, angle_optics)
+            yield from bps.mv(mirror2, angle_optics)
+
+            grating_angles_to_scan = np.linspace(
+                start = angle_optics - 0.08,
+                stop = angle_optics + 0.08,
+                num = 100,
+                                                )
+            
+            comment_template = "RSoXS 250 grating 0 order scans.  "
+            comment_template = comment_template + "M2 = PGM = " + str(angle_optics) + " degrees. "
+            comment_template = comment_template + str(sample_id) + ".  "
+
+            yield from nbs_list_scan(
+                grating,
+                grating_angles_to_scan,
+                comment = comment_template,
+            )
+        
+
+
+    ## Restore energy
+    yield from bps.mv(en.polarization, 90)
+    yield from bps.mv(en, 291.65)
+
+
+
 def HOPG_energy_resolution_series():
     """
     This series is especially helpful when selecting slits1.vsize to balance beam flux and energy resolution.
@@ -656,10 +767,6 @@ def HOPG_energy_resolution_series():
     
     ## Start and end at safe configuraiton like WAXSNEXAFS
     yield from load_configuration("WAXSNEXAFS")
-    
-    ## Load sample at the desired angle
-    yield from load_samp("HOPG")
-    yield from rotate_now(20)
 
     ## Set polarization and energy parameters
     yield from set_polarization(90)
@@ -682,15 +789,23 @@ def HOPG_energy_resolution_series():
         )
     )
     """
-    for slit1_vsize in slit1_vsizes:
-        yield from bps.mv(slits1.vsize, slit1_vsize)
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    n_exposures=1, 
-                                    group_name="EnergyResolutionSeries",
-                                    )
+
+    
+    for sample_id in ["HOPG_new", "HOPG_old"]:
+        ## Load sample at the desired angle
+        print("Loading sample: " + str(sample_id))
+        yield from load_samp(sample_id)
+        yield from rotate_now(20)
+
+        for slit1_vsize in slit1_vsizes:
+            yield from bps.mv(slits1.vsize, slit1_vsize)
+            yield from nbs_energy_scan(
+                                        *energy_parameters,
+                                        use_2d_detector=False, 
+                                        dwell=1,
+                                        n_exposures=1, 
+                                        group_name="EnergyResolutionSeries",
+                                        )
 
 
     yield from load_configuration("WAXSNEXAFS")
