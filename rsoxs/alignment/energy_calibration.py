@@ -86,6 +86,16 @@ def calibrate_pgm_offsets(
 
 
 
+
+
+
+
+
+
+
+
+## The functions below work, but they did not change energy calibration 20251201
+
 def scan_pgm_angles_open_beam(
     lines_per_mm_pgm = 250,
     polarizations = [90, 90, 90, 90, 90], #polarizations = np.full(shape = 5, fill_value = 90),
