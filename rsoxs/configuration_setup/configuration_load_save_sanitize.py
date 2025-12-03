@@ -424,8 +424,8 @@ def sanitizeEnergyScan(acquisitionInput):
     if isinstance(acquisition[parameterName], (float, int)):
         acquisition[parameterName] = (
             acquisition[parameterName],
-            acquisition[parameterName],
-            0,
+            #acquisition[parameterName],
+            #0,
         )
     if isinstance(acquisition[parameterName], str):
         if acquisition[parameterName] not in list(energy_list_parameters.keys()):
