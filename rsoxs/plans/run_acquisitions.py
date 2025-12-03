@@ -286,11 +286,11 @@ myQueue = [
 def commissioning_scans_20251201():
 
     
+    yield from spirals_WSU()
+
     yield from HOPG_energy_resolution_series()
 
     yield from open_beam_waxs_photodiode_scans(iterations=1)
-
-    yield from spirals_WSU()
 
     yield from count_beam_stability()
 
@@ -309,13 +309,13 @@ def spirals_WSU():
 
 
     sample_ids = [
-        "PC0",
-        "PC2",
-        "PC4",
-        "BD1-1",
-        "BD2-1",
-        "BD3-1",
-        "blank",
+        #"PC0",
+        #"PC2",
+        #"PC4",
+        #"BD1-1",
+        #"BD2-1",
+        #"BD3-1",
+        #"blank",
         "50nmPS",
     ]
 
@@ -325,6 +325,7 @@ def spirals_WSU():
     yield from load_configuration("WAXS")
 
     for sample_id in sample_ids:
+        print("Loading sample: " + str(sample_id))
         yield from load_samp(sample_id)
 
         yield from spiral_scan(
@@ -332,7 +333,7 @@ def spirals_WSU():
                         widthX=1.8, 
                         widthY=1.8,
                         n_exposures=1, 
-                        dwell=1,
+                        dwell=0.1,
                         )
 
 
@@ -361,96 +362,6 @@ def count_beam_stability():
                                             )
 
 
-
-def cdsaxs_20250914():
-    yield from do_cdsaxs_position_sweep()
-    yield from open_beam_waxs_photodiode_scans(iterations=1000)
-
-
-def TEY_20250914():
-
-    yield from load_samp("OpenBeam_Rotated")
-    yield from set_polarization(0)
-    energy_parameters = energy_list_parameters["carbon_NEXAFS"]
-    yield from nbs_energy_scan(
-                                *energy_parameters,
-                                use_2d_detector=False, 
-                                dwell=1,
-                                group_name="TEY",
-                                )
-    yield from nbs_energy_scan(
-                                *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                use_2d_detector=False, 
-                                dwell=1,
-                                group_name="TEY",
-                                )
-
-
-    for edge in ["nitrogen_NEXAFS", "oxygen_NEXAFS"]:
-    
-        yield from load_samp("OpenBeam_Rotated")
-        yield from set_polarization(0)
-        energy_parameters = energy_list_parameters[edge]
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        yield from nbs_energy_scan(
-                                    *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        
-
-        TEY_queue = [
-            {
-                "sample_id": "ZnMIP_unexposed",
-                "configuration_instrument": "WAXSNEXAFS",
-                "scan_type": "nexafs",
-                "energy_list_parameters": edge,
-                "polarizations": [0], 
-                "cycles": 1,
-                "sample_angles": [55],
-                "group_name": "TEY",
-                "priority": 1,
-            },
-
-            {
-                "sample_id": "ZnMIP_exposed",
-                "configuration_instrument": "WAXSNEXAFS",
-                "scan_type": "nexafs",
-                "energy_list_parameters": edge,
-                "polarizations": [0], 
-                "cycles": 1,
-                "sample_angles": [55],
-                "group_name": "TEY",
-                "priority": 1,
-            },
-        ]
-        for acq in TEY_queue:
-            yield from run_acquisitions_single(acquisition=acq, dryrun=False)
-        
-
-
-        yield from load_samp("OpenBeam_Rotated")
-        yield from set_polarization(0)
-        energy_parameters = energy_list_parameters[edge]
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        yield from nbs_energy_scan(
-                                    *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-    
 
 
 
@@ -664,8 +575,8 @@ def open_beam_waxs_photodiode_scans(iterations=1):
     "configuration_instrument": "WAXSNEXAFS",
     "scan_type": "nexafs",
     "energy_list_parameters": "carbon_NEXAFS",
-    "polarizations": [0, 90], #"polarizations": [0, 90, 45, 135], 
-    "cycles": 1,
+    "polarizations": [0], #"polarizations": [0, 90, 45, 135], 
+    "cycles": 0,
     "group_name": "Assess PGM contamination",
     "priority": 1,
     }
@@ -797,7 +708,7 @@ def HOPG_energy_resolution_series():
     """
 
     
-    for sample_id in ["HOPG_new", "HOPG_old"]:
+    for sample_id in ["HOPG_new"]:
         ## Load sample at the desired angle
         print("Loading sample: " + str(sample_id))
         yield from load_samp(sample_id)
@@ -847,7 +758,7 @@ def WAXS_camera_position_offset_scans():
                                 *energy_parameters,
                                 use_2d_detector=True, 
                                 dwell=0.1,
-                                n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                                n_exposures=1, ## Was going to take 90 repeats, but then darks would be very infrequent 
                                 group_name="Assess WAXS camera quadrants",
                                 sample="SBA15",
                                 )
