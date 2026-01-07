@@ -152,7 +152,7 @@ def dark_plan(det):
 #     limit=20,
 # )
 
-
+"""
 dark_frame_preprocessor_waxs = bluesky_darkframes.DarkFramePreprocessor(
     dark_plan=dark_plan,
     detector=waxs_det,
@@ -170,7 +170,6 @@ dark_frame_preprocessor_waxs = bluesky_darkframes.DarkFramePreprocessor(
 )
 
 dark_frame_preprocessor_waxs_spirals = bluesky_darkframes.DarkFramePreprocessor(
-    waxs_det = bl["waxs_det"]
 
     dark_plan=dark_plan,
     detector=waxs_det,
@@ -187,3 +186,5 @@ dark_frame_preprocessor_waxs_spirals = bluesky_darkframes.DarkFramePreprocessor(
 
 dark_frames_enable_waxs = make_decorator(dark_frame_preprocessor_waxs)()
 # dark_frames_enable_saxs = make_decorator(dark_frame_preprocessor_saxs)()
+
+"""

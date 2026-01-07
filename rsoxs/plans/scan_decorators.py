@@ -3,7 +3,7 @@ from nbs_bl.utils import merge_func
 import bluesky.plan_stubs as bps
 from functools import partial
 from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
-from nbs_bl.hw import shutter_control, shutter_open_time, shutter_y, en, #waxs_det
+from nbs_bl.hw import shutter_control, shutter_open_time, shutter_y, en #waxs_det
 from bluesky.preprocessors import finalize_wrapper
 
 #from nbs_bl.beamline import GLOBAL_BEAMLINE
@@ -80,7 +80,7 @@ def rsoxs_waxs_decorator(func):
             if dwell > 0.001 and dwell < 1000:
                 waxs_det.set_exptime(dwell)
                 shutter_open_time.set(dwell * 1000).wait()
-                for det in GLOBAL_BEAMLINE.detectors.active:
+                for det in bl.detectors.active:
                     if hasattr(det, "exposure_time"):
                         det.exposure_time.set(
                             max(0.3, dwell - 0.5)

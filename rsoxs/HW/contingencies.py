@@ -104,10 +104,10 @@ suspend_current = SuspendFloor(
     post_plan=beamup_notice,
 )
 
-
+"""
 suspend_waxs_temp_low = SuspendFloor(
    
-   waxs_det = bl["waxs_det"]
+   
    
    waxs_det.cam.temperature_actual,
    resume_thresh=-85,
@@ -121,7 +121,7 @@ suspend_waxs_temp_low = SuspendFloor(
 
 suspend_waxs_temp_high = SuspendCeil(
    
-   waxs_det = bl["waxs_det"]
+   
    
    waxs_det.cam.temperature_actual,
    resume_thresh=-78,
@@ -131,7 +131,7 @@ suspend_waxs_temp_high = SuspendCeil(
    pre_plan=temp_bad_notice,
    post_plan=temp_ok_notice,
 )
-
+"""
 
 # suspend_saxs_temp_low = SuspendFloor(
     # saxs_det.cam.temperature_actual,
@@ -274,7 +274,7 @@ def turn_off_checks():
     logger.removeHandler(safe_handler)
     logger.removeHandler(mail_handler)
 
-
+"""
 def waxs_spiral_mode():
    try:
        RE.preprocessors.remove(dark_frame_preprocessor_waxs_spirals)
@@ -301,6 +301,7 @@ def waxs_normal_mode():
 
 # install preprocessors
 waxs_normal_mode()
+"""
 # RE.preprocessors.append(dark_frame_preprocessor_saxs)
 # install handlers for errors and install suspenders
 turn_on_checks()
