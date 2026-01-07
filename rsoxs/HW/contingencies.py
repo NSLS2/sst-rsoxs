@@ -37,8 +37,8 @@ from nbs_bl.hw import (
 from ..HW.detectors import (
     start_det_cooling,
     stop_det_cooling,
-    dark_frame_preprocessor_waxs_spirals,
-    dark_frame_preprocessor_waxs,
+    #dark_frame_preprocessor_waxs_spirals,
+    #dark_frame_preprocessor_waxs,
     # dark_frame_preprocessor_saxs,
 )
 from ..startup import RE

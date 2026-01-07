@@ -70,13 +70,16 @@ def rsoxs_waxs_decorator(func):
             Number of exposures for the Greateyes detector to take per step
         """
 
-        waxs_det = bl["waxs_det"]
+        
 
         print("RSoXS decorator applied to scan")
         _extra_dets = []
         _extra_dets.extend(extra_dets)
 
         if use_2d_detector:
+
+            waxs_det = bl["waxs_det"]
+            
             if dwell > 0.001 and dwell < 1000:
                 waxs_det.set_exptime(dwell)
                 shutter_open_time.set(dwell * 1000).wait()
