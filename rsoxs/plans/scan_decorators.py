@@ -2,10 +2,11 @@ from nbs_bl.plans.scan_decorators import wrap_metadata
 from nbs_bl.utils import merge_func
 import bluesky.plan_stubs as bps
 from functools import partial
-from nbs_bl.hw import shutter_control, shutter_open_time, shutter_y, waxs_det, en
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
+from nbs_bl.hw import shutter_control, shutter_open_time, shutter_y, en, #waxs_det
 from bluesky.preprocessors import finalize_wrapper
 
-from nbs_bl.beamline import GLOBAL_BEAMLINE
+#from nbs_bl.beamline import GLOBAL_BEAMLINE
 from .per_steps import take_exposure_corrected_reading, one_nd_sticky_exp_step, trigger_and_read_with_shutter
 from rsoxs.configuration_setup.configurations_instrument import load_configuration
 
@@ -68,6 +69,9 @@ def rsoxs_waxs_decorator(func):
         n_exposures : int, optional
             Number of exposures for the Greateyes detector to take per step
         """
+
+        waxs_det = bl["waxs_det"]
+
         print("RSoXS decorator applied to scan")
         _extra_dets = []
         _extra_dets.extend(extra_dets)

@@ -7,6 +7,7 @@ from bluesky.callbacks.fitting import PeakStats
 from bluesky.preprocessors import subs_wrapper
 from bluesky import preprocessors as bpp
 from bluesky.run_engine import Msg
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
     grating,
@@ -24,7 +25,7 @@ from nbs_bl.hw import (
     rsoxs_ll_gpwr,
     gvll,
     beamstop_waxs,
-    waxs_det,
+    #waxs_det,
     DownstreamLargeDiode_int,
     Sample_TEY,
     Sample_TEY_int,
@@ -599,6 +600,9 @@ def reset_amps():
 #[200,250,270,280,282,283,284,285,286,287,288,500,535,800]
 
 def do_cdsaxs(energies, samples):
+    
+    waxs_det = bl["waxs_det"]
+    
     ## If a reduction in X-ray dose is needed, then adjust the slitsc aperture size and not the exposure time.  The 9 s exposure time is necessary to ensure X-ray exposure is delivered at all angles.
     yield from bps.mv(slitsc,-1.05) # big flux
     for samp in samples:
@@ -627,6 +631,9 @@ def do_cdsaxs(energies, samples):
 
 
 def ramp_temp_test(temp,ramp_rate,interval,energies,pols,name):
+    
+    waxs_det = bl["waxs_det"]
+    
     yield from bps.mv(tem_tempstage.ramp_rate,ramp_rate)
     status = (yield from bps.abs_set(tem_tempstage.setpoint,temp,group='temp'))
     while not status.done:

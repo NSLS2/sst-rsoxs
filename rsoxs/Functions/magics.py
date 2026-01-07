@@ -21,9 +21,10 @@ from nbs_bl.hw import (
 )
 
 from rsoxs.configuration_setup.configurations_instrument import clear_rsoxs #from .configurations import all_out
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from ..HW.detectors import (
     set_exposure,
-    waxs_det,
+    #waxs_det,
     snapshot,
     exposure,
 )
@@ -183,6 +184,9 @@ del exp
 
 @register_line_magic
 def binning(line):
+    
+    waxs_det = bl["waxs_det"]
+    
     try:
         bins = int(line)
     except:
@@ -203,6 +207,9 @@ del binning
 
 @register_line_magic
 def temp(line):
+
+    waxs_det = bl["waxs_det"]
+
     boxed_text(
         "Detector cooling",
         "   " + waxs_det.cooling_state() ,#+ "\n   " + saxs_det.cooling_state(),
@@ -217,6 +224,9 @@ del temp
 
 @register_line_magic
 def cool(line):
+    
+    waxs_det = bl["waxs_det"]
+    
     # saxs_det.cooling_on()
     waxs_det.cooling_on()
 
@@ -226,6 +236,9 @@ del cool
 
 @register_line_magic
 def warm(line):
+    
+    waxs_det = bl["waxs_det"]
+    
     # saxs_det.cooling_off()
     waxs_det.cooling_off()
 
@@ -331,6 +344,9 @@ ip.prompts = RSoXSPrompt(ip)
 
 def beamline_status():
     #sample()
+    
+    waxs_det = bl["waxs_det"]
+    
     boxed_text(
         "Detector status",
         exposure()

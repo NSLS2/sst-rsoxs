@@ -16,6 +16,9 @@ from ..Functions.contingencies import (
     amp_fault_clear_20,
     amp_fault_clear_21,
 )
+
+
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     ring_current,
     fesh, 
@@ -24,7 +27,7 @@ from nbs_bl.hw import (
     gvll, 
     gv27a,
     sam_X,
-    waxs_det,
+    #waxs_det,
     mc19_fault, 
     mc20_fault, 
     mc21_fault,
@@ -45,6 +48,9 @@ run_report(__file__)
 
 
 def waxs_back_on():
+   
+   waxs_det = bl["waxs_det"]
+   
    yield from bps.mv(
        waxs_det.cam.temperature, -80, waxs_det.cam.enable_cooling, 1, waxs_det.cam.bin_x, 4, waxs_det.cam.bin_y, 4
    )
@@ -100,6 +106,9 @@ suspend_current = SuspendFloor(
 
 
 suspend_waxs_temp_low = SuspendFloor(
+   
+   waxs_det = bl["waxs_det"]
+   
    waxs_det.cam.temperature_actual,
    resume_thresh=-85,
    suspend_thresh=-90,
@@ -111,6 +120,9 @@ suspend_waxs_temp_low = SuspendFloor(
 
 
 suspend_waxs_temp_high = SuspendCeil(
+   
+   waxs_det = bl["waxs_det"]
+   
    waxs_det.cam.temperature_actual,
    resume_thresh=-78,
    suspend_thresh=-75,

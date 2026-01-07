@@ -60,7 +60,7 @@ def load_configuration(configuration_name):
             "RSoXS_WAXS_BCX": 474,
             "RSoXS_WAXS_BCY": 502,
             "WAXS_Mask": [(477.418, 535.415), (446.074, 511.344), (872.214, -0.476), (948.916, -0.476)],
-            "RSoXS_SAXS_SDD": None,
+            "RSD": None,
             "RSoXS_SAXS_BCX": None,
             "RSoXS_SAXS_BCY": None,
         }
