@@ -5,7 +5,7 @@ from bluesky import FailedStatus
 from datetime import datetime as datet
 from nbs_bl.hw import (
     beamstop_waxs,
-    Beamstop_SAXS,
+    #Beamstop_SAXS,
     izero_mesh,
     Sample_TEY_int,
     ring_current,
@@ -165,6 +165,6 @@ def reset_diodes():
     yield from setup_diode_i400()
 
 
-def check_diodes():
-    if datet.timestamp(datet.now()) - Beamstop_SAXS.read()["SAXS Beamstop"]["timestamp"] > 1:
-        yield from reset_diodes()
+#def check_diodes():
+#    if datet.timestamp(datet.now()) - Beamstop_SAXS.read()["SAXS Beamstop"]["timestamp"] > 1:
+#        yield from reset_diodes()

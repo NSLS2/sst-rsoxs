@@ -123,7 +123,9 @@ def motors(line):
     )
 
 
-del x, y, z, th, ds, dw, bss, bsw, motors
+del x, y, z, th, 
+#del ds, dw, bss, 
+del bsw, motors
 
 
 # Energy
