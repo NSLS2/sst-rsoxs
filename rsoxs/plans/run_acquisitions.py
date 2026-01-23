@@ -32,7 +32,7 @@ from nbs_bl.hw import (
     manipulator,
     sam_Th,
     #waxs_det,
-    Det_W,
+    #Det_W,
 )
 from ..configuration_setup.configuration_load_save_sanitize import (
     gatherAcquisitionsFromConfiguration, 
@@ -729,7 +729,7 @@ def HOPG_energy_resolution_series():
     yield from load_configuration("WAXSNEXAFS")
 
 
-
+"""
 def WAXS_camera_position_offset_scans():
 
     print("Starting WAXS camera offset scans")
@@ -763,7 +763,7 @@ def WAXS_camera_position_offset_scans():
                                 group_name="Assess WAXS camera quadrants",
                                 sample="SBA15",
                                 )
-
+"""
 
 def WAXS_camera_flat_field_illumination_Al_foil():
 

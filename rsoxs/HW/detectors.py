@@ -4,7 +4,16 @@ from bluesky.preprocessors import make_decorator
 import bluesky_darkframes
 
 from ..devices.detectors import RSOXSGreatEyesDetector, SimGreatEyes
-from nbs_bl.hw import en, shutter_control, shutter_open_time, Det_S, Det_W, sam_Th, sam_X, sam_Y #, waxs_det
+from nbs_bl.hw import (
+    en, 
+    shutter_control, 
+    shutter_open_time, 
+    #Det_S, 
+    #Det_W, 
+    sam_Th, 
+    sam_X, 
+    sam_Y #, waxs_det
+)
 from nbs_bl.plans.scans import nbs_count
 from nbs_bl.printing import boxed_text, run_report
 from ..Functions.per_steps import trigger_and_read_with_shutter

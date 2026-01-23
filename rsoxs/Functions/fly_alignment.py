@@ -25,11 +25,11 @@ from nbs_bl.hw import (
     sam_Z,
     beamstop_waxs,
     BeamStopW,
-    Det_W,
-    Beamstop_SAXS,
-    BeamStopS,
-    Det_S,
-    DownstreamLargeDiode_int,
+    #Det_W,
+    #Beamstop_SAXS,
+    #BeamStopS,
+    #Det_S,
+    #DownstreamLargeDiode_int,
 )
 from ..startup import sd  # bec, db
 
