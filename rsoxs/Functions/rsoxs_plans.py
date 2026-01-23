@@ -3,7 +3,8 @@ from bluesky.preprocessors import finalize_decorator
 import datetime
 from copy import deepcopy
 from nbs_bl.printing import run_report, boxed_text
-from rsoxs_scans.rsoxs import dryrun_rsoxs_plan
+
+#from rsoxs_scans.rsoxs import dryrun_rsoxs_plan
 from .alignment import load_sample, move_to_location, rotate_sample
 from rsoxs.configuration_setup.configurations_instrument import load_configuration
 from nbs_bl.hw import (
@@ -125,6 +126,7 @@ def do_rsoxs(md=None, **kwargs):
         md=None,
     """
 
+    """
     _md = deepcopy(dict(RE.md))
     if md == None:
         md = {}
@@ -137,5 +139,5 @@ def do_rsoxs(md=None, **kwargs):
     for queue_step in outputs:
         yield from run_queue_step(queue_step)
     print("End of RSoXS plan")
-
+    """
 

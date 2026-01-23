@@ -2,3 +2,5 @@
 bluesky
 nbs-bl
 sst_base
+bluesky-darkframes
+slackclient
