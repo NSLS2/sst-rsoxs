@@ -93,7 +93,7 @@ def view_positions(configuration_name):
 
 position_RSoXSDiagnosticModule_OutOfBeamPath = 145
 position_RSoXSSlitAperture_FullyOpen = 10
-position_BeamstopWAXS_InBeamPath = 69.6  ## Out is 3
+position_BeamstopWAXS_InBeamPath = 20 #69.6 from May 2025 to December 2025  ## Out is 3
 position_CameraWAXS_InBeamPath = 2
 position_CameraWAXS_OutOfBeamPath = -94
 
@@ -127,7 +127,7 @@ default_configurations = {
         {"motor": shutter_y, "position": 44, "order": 0},
         {"motor": izero_y, "position": 144, "order": 0},
         #{"motor": Det_W, "position": -94, "order": 0},
-        {"motor": BeamStopW, "position": 3, "order": 0},
+        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 3, "order": 0},
         #{"motor": BeamStopS, "position": 3, "order": 0},
     ],
 

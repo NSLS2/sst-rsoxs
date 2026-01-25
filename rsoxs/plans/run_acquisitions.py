@@ -284,58 +284,31 @@ myQueue = [
 
 
 
-def commissioning_scans_20251201():
+def commissioning_scans_20260125():
 
     
-    yield from spirals_WSU()
-
     yield from HOPG_energy_resolution_series()
 
-    yield from open_beam_waxs_photodiode_scans(iterations=1)
+    #yield from I0_mesh_vertical_profile_energy_scan()
 
-    yield from count_beam_stability()
-
-    yield from zero_order_scans()
-
-    yield from WAXS_camera_position_offset_scans()
-
-    yield from open_beam_waxs_photodiode_scans(iterations=1000)
+    #yield from open_beam_waxs_photodiode_scans(iterations=1)
+    yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350, 
+                               comment = "CFF = 1.5"
+                                )
+    yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440, 
+                               comment = "CFF = 1.5"
+                                )
+    yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560, 
+                               comment = "CFF = 1.5"
+                                )
+    yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740, 
+                               comment = "CFF = 1.5"
+                                )
         
     
 
 
-def spirals_WSU():
 
-    print("Starting WSU spirals")
-
-
-    sample_ids = [
-        #"PC0",
-        #"PC2",
-        #"PC4",
-        #"BD1-1",
-        #"BD2-1",
-        #"BD3-1",
-        #"blank",
-        "50nmPS",
-    ]
-
-    yield from set_polarization(0)
-    yield from bps.mv(en, 270)
-
-    yield from load_configuration("WAXS")
-
-    for sample_id in sample_ids:
-        print("Loading sample: " + str(sample_id))
-        yield from load_samp(sample_id)
-
-        yield from spiral_scan(
-                        stepsize=0.3, 
-                        widthX=1.8, 
-                        widthY=1.8,
-                        n_exposures=1, 
-                        dwell=0.1,
-                        )
 
 
 
@@ -502,8 +475,7 @@ def I0_mesh_vertical_profile_energy_scan():
 
     yield from load_configuration("WAXSNEXAFS")
 
-    yield from load_samp("OpenBeam")
-    add_current_position_as_sample(name="OpenBeam", sample_id="OpenBeam")
+    yield from load_samp("HOPG_guess") #yield from load_samp("OpenBeam")
 
     for polarization in [0, 90, 55]:
         print("Setting polarization: " + str(polarization))
@@ -517,7 +489,6 @@ def I0_mesh_vertical_profile_energy_scan():
             yield from nbs_energy_scan(
                                 *energy_parameters,
                                 group_name="Assess different spots on I0 mesh",
-                                sample="OpenBeam",
                                 )
     
 
@@ -702,18 +673,18 @@ def HOPG_energy_resolution_series():
     slit1_vsizes = np.concatenate(
         (
             np.arange(0.01, 0.1, 0.005),
-            np.arange(0.1, 1, 0.05),
+            np.arange(0.1, 1, 0.05), ## Requires gain to be adjusted for SRS570s
             np.arange(1, 10, 0.5),
         )
     )
     """
 
     
-    for sample_id in ["HOPG_new"]:
+    for sample_id in ["HOPG_guess"]:
         ## Load sample at the desired angle
         print("Loading sample: " + str(sample_id))
         yield from load_samp(sample_id)
-        yield from rotate_now(20)
+        #yield from rotate_now(20)
 
         for slit1_vsize in slit1_vsizes:
             yield from bps.mv(slits1.vsize, slit1_vsize)
