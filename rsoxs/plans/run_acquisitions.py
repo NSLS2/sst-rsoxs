@@ -24,6 +24,7 @@ from nbs_bl.hw import (
     fs6_cam,
     mirror2,
     grating,
+    mir3,
     slitsc,
     slits1,
     izero_y,
@@ -287,23 +288,27 @@ myQueue = [
 def commissioning_scans_20260125():
 
     
-    yield from HOPG_energy_resolution_series()
+    #yield from HOPG_energy_resolution_series()
 
-    #yield from I0_mesh_vertical_profile_energy_scan()
+    #yield from m3_pitch_sweep()
+    yield from I0_mesh_vertical_profile_energy_scan()
 
     #yield from open_beam_waxs_photodiode_scans(iterations=1)
-    yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350, 
-                               comment = "CFF = 1.5"
-                                )
-    yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440, 
-                               comment = "CFF = 1.5"
-                                )
-    yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560, 
-                               comment = "CFF = 1.5"
-                                )
-    yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740, 
-                               comment = "CFF = 1.5"
-                                )
+    for iteration in np.arange(0, 1000, 1):
+        for polarization in [0, 90, 45, 135]:
+            yield from set_polarization(polarization)
+            yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350, 
+                                    comment = "CFF = 1.5"
+                                        )
+            yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440, 
+                                    comment = "CFF = 1.5"
+                                        )
+            yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560, 
+                                    comment = "CFF = 1.5"
+                                        )
+            yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740, 
+                                    comment = "CFF = 1.5"
+                                        )
         
     
 
@@ -462,6 +467,34 @@ def M1_parameter_sweep_FS6():
 
 
 
+def m3_pitch_sweep():
+    """
+    Runs sweep in M3 pitch across different energies to see if the maximum stays the same across energies.
+    If not, then the M2/PGM roll may need to be adjusted via the manual wobble stick.
+    """
+
+    m3_pitches_to_scan = np.arange(7.6, 8, 0.002)
+    energies_to_scan = [90, 110, 130, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000]
+    polarizations_to_scan = [0, 90]
+
+    yield from load_configuration("WAXSNEXAFS")
+    yield from load_samp("HOPG_guess") #yield from load_samp("OpenBeam")
+
+    print("Starting M3 pitch sweep.")
+    for polarization in polarizations_to_scan:
+        print("Setting polarization: " + str(polarization))
+        yield from set_polarization(polarization)
+        for energy in energies_to_scan:
+            #if polarization == 90 and energy < 790: continue
+            print("Setting energy: " + str(energy) + " eV")
+            yield from bps.mv(en, energy)
+            yield from nbs_list_scan(mir3.pitch, m3_pitches_to_scan)
+
+
+    ## Restore old settings
+    yield from set_polarization(0)
+    yield from bps.mv(en, 270)
+    yield from bps.mv(mir3.pitch, 7.78)
     
 
 
@@ -482,6 +515,9 @@ def I0_mesh_vertical_profile_energy_scan():
         yield from set_polarization(polarization)
 
         for I0_position in I0_positions:
+            
+            #if polarization == 90 and I0_position < -38.7: continue
+            
             print("Moving to izero_y position: " + str(I0_position))
             yield from bps.mv(izero_y, I0_position)
 
