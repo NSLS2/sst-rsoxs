@@ -51,8 +51,6 @@ from nbs_bl.hw import (
     Sample_TEY, 
     #Beamstop_SAXS_int,
     beamstop_waxs,
-    DownstreamLargeDiode, 
-    DownstreamLargeDiode_int, 
     Sample_TEY_int, 
     ring_current,
 )
@@ -217,7 +215,7 @@ def NEXAFS_step_scan_core(
     if dets is None:
         dets = [
             #Beamstop_SAXS_int,
-            beamstop_waxs, DownstreamLargeDiode_int, izero_mesh,Sample_TEY_int
+            beamstop_waxs, izero_mesh,Sample_TEY_int
             ]
     if energies is None:
         energies = []

@@ -285,30 +285,24 @@ myQueue = [
 
 
 
-def commissioning_scans_20260125():
+def commissioning_scans_20260204():
 
     
     #yield from HOPG_energy_resolution_series()
 
-    #yield from m3_pitch_sweep()
-    yield from I0_mesh_vertical_profile_energy_scan()
+    yield from m3_pitch_sweep()
+    #yield from I0_mesh_vertical_profile_energy_scan()
 
     #yield from open_beam_waxs_photodiode_scans(iterations=1)
+    yield from load_samp("OpenBeam_SolidY345")
     for iteration in np.arange(0, 1000, 1):
         for polarization in [0, 90, 45, 135]:
             yield from set_polarization(polarization)
-            yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350, 
-                                    comment = "CFF = 1.5"
-                                        )
-            yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440, 
-                                    comment = "CFF = 1.5"
-                                        )
-            yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560, 
-                                    comment = "CFF = 1.5"
-                                        )
-            yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740, 
-                                    comment = "CFF = 1.5"
-                                        )
+            yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350)
+            yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440)
+            yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560)
+            yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740)
+            yield from nbs_energy_scan(1820, 1.25, 1840, 0.25, 1860, 1.25, 1910)
         
     
 
@@ -478,7 +472,7 @@ def m3_pitch_sweep():
     polarizations_to_scan = [0, 90]
 
     yield from load_configuration("WAXSNEXAFS")
-    yield from load_samp("HOPG_guess") #yield from load_samp("OpenBeam")
+    yield from load_samp("OpenBeam_SolidY345") #yield from load_samp("HOPG_guess") #yield from load_samp("OpenBeam")
 
     print("Starting M3 pitch sweep.")
     for polarization in polarizations_to_scan:
@@ -591,7 +585,7 @@ def open_beam_waxs_photodiode_scans(iterations=1):
 
     open_beam_queue = [template_acquisition]
 
-    for energy_parameters in ["nitrogen_NEXAFS", "oxygen_NEXAFS", "fluorine_NEXAFS"]:
+    for energy_parameters in ["nitrogen_NEXAFS", "oxygen_NEXAFS", "fluorine_NEXAFS", "silicon_NEXAFS"]:
         acquisition = copy.deepcopy(template_acquisition)
         acquisition["energy_list_parameters"] = energy_parameters
         acquisition["priority"] = open_beam_queue[-1]["priority"] + 1

@@ -29,7 +29,6 @@ from nbs_bl.hw import (
     #Beamstop_SAXS,
     #BeamStopS,
     #Det_S,
-    #DownstreamLargeDiode_int,
 )
 from ..startup import sd  # bec, db
 

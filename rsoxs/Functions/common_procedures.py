@@ -26,7 +26,6 @@ from nbs_bl.hw import (
     gvll,
     beamstop_waxs,
     #waxs_det,
-    DownstreamLargeDiode_int,
     Sample_TEY,
     Sample_TEY_int,
     MC19_disable,
@@ -123,7 +122,7 @@ def buildeputable(
         
         yield from bps.mv(mono_en, energy,en.scanlock, False,epu_gap,startgap)
         yield from fly_max(
-            [izero_mesh, beamstop_waxs, DownstreamLargeDiode_int],
+            [izero_mesh, beamstop_waxs],
             [
                 "RSoXS Au Mesh Current",
                 "WAXS Beamstop",
@@ -254,7 +253,7 @@ def Scan_izero_peak(startingen, widfract):
     ps = PeakStats("en_energy", "RSoXS Au Mesh Current")
     yield from subs_wrapper(
         tune_max(
-            [izero_mesh, beamstop_waxs, DownstreamLargeDiode_int],
+            [izero_mesh, beamstop_waxs],
             "RSoXS Au Mesh Current",
             mono_en,
             min(2100, max(72, startingen - 10 * widfract)),
@@ -277,7 +276,6 @@ def buildeputablegaps(start, stop, step, widfract, startingen, name, phase, grat
     gapsout = []
     heights = []
     beamstop_waxs.kind = "hinted"
-    DownstreamLargeDiode_int.kind = "hinted"
     izero_mesh.kind = "hinted"
     epu_gap.kind = "hinted"
     # startinggap = epugap_from_energy(ens[0]) #get starting position from existing table
@@ -297,7 +295,7 @@ def buildeputablegaps(start, stop, step, widfract, startingen, name, phase, grat
         yield from bps.mv(mono_en, max(72, startingen - 10 * widfract))
         peaklist = []
         yield from tune_max(
-            [izero_mesh, beamstop_waxs, DownstreamLargeDiode_int],
+            [izero_mesh, beamstop_waxs],
             "RSoXS Au Mesh Current",
             mono_en,
             min(2100, max(72, startingen - 10 * widfract)),
@@ -353,7 +351,6 @@ def do_2020_eputables():
 def do_2023_eputables():
     izero_mesh.kind = "hinted"
     beamstop_waxs.kind = "hinted"
-    DownstreamLargeDiode_int.kind = "hinted"
     mono_en.readback.kind = "hinted"
     mono_en.kind = "hinted"
     mono_en.read_attrs = ["readback"]
