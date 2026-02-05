@@ -443,35 +443,7 @@ def M1_parameter_sweep_FS6():
 
 
 
-def m3_pitch_sweep():
-    """
-    Runs sweep in M3 pitch across different energies to see if the maximum stays the same across energies.
-    If not, then the M2/PGM roll may need to be adjusted via the manual wobble stick.
-    """
 
-    m3_pitches_to_scan = np.arange(7.6, 8, 0.002)
-    energies_to_scan = [90, 110, 130, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000]
-    polarizations_to_scan = [0, 90]
-
-    yield from load_configuration("WAXSNEXAFS")
-    yield from load_samp("OpenBeam_SolidY345") #yield from load_samp("HOPG_guess") #yield from load_samp("OpenBeam")
-
-    print("Starting M3 pitch sweep.")
-    for polarization in polarizations_to_scan:
-        print("Setting polarization: " + str(polarization))
-        yield from set_polarization(polarization)
-        for energy in energies_to_scan:
-            #if polarization == 90 and energy < 790: continue
-            print("Setting energy: " + str(energy) + " eV")
-            yield from bps.mv(en, energy)
-            yield from nbs_list_scan(mir3.pitch, m3_pitches_to_scan)
-
-
-    ## Restore old settings
-    yield from set_polarization(0)
-    yield from bps.mv(en, 270)
-    yield from bps.mv(mir3.pitch, 7.78)
-    
 
 
 def I0_mesh_vertical_profile_energy_scan():
@@ -657,59 +629,6 @@ def zero_order_scans():
     yield from bps.mv(en, 291.65)
 
 
-
-def HOPG_energy_resolution_series():
-    """
-    This series is especially helpful when selecting slits1.vsize to balance beam flux and energy resolution.
-    Moreover, it should be run routinely during commissioning to assess energy resolution and adjust energy calibration if needed.
-    """
-
-    print("Starting HOPG energy resolution series")
-    
-    ## Start and end at safe configuraiton like WAXSNEXAFS
-    yield from load_configuration("WAXSNEXAFS")
-
-    ## Set polarization and energy parameters
-    yield from set_polarization(90)
-    energy_parameters = energy_list_parameters["carbon_NEXAFS"]
-
-    yield from bps.mv(
-        slits2.vsize, 10,
-        slits2.hsize, 10,
-        slits3.vsize, 10,
-        slits3.hsize, 10,
-        )
-
-    slit1_vsizes = [0.01, 0.02, 0.04, 0.1, 0.2, 0.4]
-    """
-    slit1_vsizes = np.concatenate(
-        (
-            np.arange(0.01, 0.1, 0.005),
-            np.arange(0.1, 1, 0.05), ## Requires gain to be adjusted for SRS570s
-            np.arange(1, 10, 0.5),
-        )
-    )
-    """
-
-    
-    for sample_id in ["HOPG_guess"]:
-        ## Load sample at the desired angle
-        print("Loading sample: " + str(sample_id))
-        yield from load_samp(sample_id)
-        #yield from rotate_now(20)
-
-        for slit1_vsize in slit1_vsizes:
-            yield from bps.mv(slits1.vsize, slit1_vsize)
-            yield from nbs_energy_scan(
-                                        *energy_parameters,
-                                        use_2d_detector=False, 
-                                        dwell=1,
-                                        n_exposures=1, 
-                                        group_name="EnergyResolutionSeries",
-                                        )
-
-
-    yield from load_configuration("WAXSNEXAFS")
 
 
 """

@@ -62,9 +62,11 @@ def m3_sweep(
 
 
     Examples:
-        For commissioning studies, run the default parameters using RE(m3_sweep()).
+        For user beam time startup and before energy calibration, run a smaller subset such as RE(m3_sweep(polarizations=[0], energies=[270], m3_xs=[24.2]))
         
-        For user beam time startup, run a smaller subset such as RE(m3_sweep(polarizations=[0], energies=[270], m3_xs=[24.2]))
+        For commissioning studies and after energy calibration, run the default parameters using RE(m3_sweep()).
+        
+        
     """
 
     ## Set input variables

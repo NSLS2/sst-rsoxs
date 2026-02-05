@@ -4,12 +4,18 @@ from nbs_bl.hw import (
     en,
     grating,
     mirror2,
+    slits1,
+    slits2,
+    slits3,
     Sample_TEY_int,
 )
 from nbs_bl.gGrEqns import get_mirror_grating_angles, find_best_offsets
-from nbs_bl.plans.scans import nbs_list_scan
+from nbs_bl.plans.scans import nbs_list_scan, nbs_energy_scan
+from rsoxs.HW.energy import set_polarization
+from ..plans.default_energy_parameters import energy_list_parameters
 from .fly_alignment import rsoxs_fly_max
 from ..Functions.alignment import load_samp, rotate_now
+from ..configuration_setup.configurations_instrument import load_configuration
 
 
 
@@ -360,3 +366,77 @@ def correct_m2_pgm_offsets(
     if accept in ["y", "Y", "yes"]:
         yield from bps.mvr(mirror2.user_offset, -fit.x[0], grating.user_offset, -fit.x[1])
     return fit
+
+
+
+
+
+
+
+
+
+
+
+
+def energy_resolution_series(
+     sample_id = "HOPG",
+     energy_parameters = "carbon_NEXAFS_slow",
+     slit1_vsizes = None,     
+):
+    """
+    This series is especially helpful when selecting slits1.vsize to balance beam flux and energy resolution.
+    Moreover, it should be run routinely during commissioning to assess energy resolution and adjust energy calibration if needed.
+    
+    TODO: fill in more thorough documentation.
+    """
+
+    ## Set input variables
+    if isinstance(energy_parameters, str):
+         energy_parameters = energy_list_parameters[energy_parameters]
+    if slit1_vsizes is None:
+         slit1_vsizes = np.concatenate((
+                np.arange(10, 1, -0.5),
+                np.arange(1, 0.1, -0.05), ## Requires gain to be adjusted for SRS570s
+                np.arange(0.1, 0.005, -0.005),
+        ))
+         #slit1_vsizes = [0.01, 0.02, 0.04, 0.1, 0.2, 0.4] ## For quicker check
+
+
+    print("Starting energy resolution series")
+    
+    ## Start and end at safe configuraiton like WAXSNEXAFS
+    #yield from load_configuration("WAXSNEXAFS")
+
+    ## Set polarization
+    yield from set_polarization(90)
+    
+    ## Open slits 2 and 3, as they are not needed for NEXAFS
+    yield from bps.mv(
+        slits2.vsize, 10,
+        slits2.hsize, 10,
+        slits3.vsize, 10,
+        slits3.hsize, 10,
+        )
+
+    
+    ## Load sample at the desired angle
+    print("Loading sample: " + str(sample_id))
+    yield from load_samp(sample_id)
+    #yield from rotate_now(20)
+
+    for slit1_vsize in slit1_vsizes:
+        print("Slits 1 vsize = " + str(slit1_vsize))
+        yield from bps.mv(slits1.vsize, slit1_vsize)
+        yield from nbs_energy_scan(
+                                    *energy_parameters,
+                                    use_2d_detector=False, 
+                                    dwell=1,
+                                    n_exposures=1, 
+                                    group_name="EnergyResolutionSeries",
+                                    )
+
+
+    yield from load_configuration("WAXSNEXAFS")
+
+
+

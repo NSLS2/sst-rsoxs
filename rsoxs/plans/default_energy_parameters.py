@@ -17,7 +17,7 @@ energy_list_parameters = {
     "zincL_NEXAFS":  (1000, 1.5, 1015, 0.25, 1035, 1.25, 1085),
 
     "carbon_NEXAFS_WSU":  (270, 1, 278, 0.5, 283, 0.05, 291.5, 0.5, 300, 1, 330, 4, 350), ## WSU NEXAFS for Brian Collins group
-    "carbon_NEXAFS_Slow":  (250, 0.25, 282, 0.1, 297, 0.25, 350),
+    "carbon_NEXAFS_slow":  (250, 0.25, 282, 0.1, 297, 0.25, 350),
 
     "carbon_RSoXS":  (250, 5, 270, 1, 282, 0.1, 287, 0.2, 292, 1, 305, 5, 350),
     "nitrogen_RSoXS":  (380, 0.25, 397, 0.1, 407, 0.3, 440),
