@@ -27,7 +27,7 @@ from nbs_bl.hw import (
     sam_X,
     TEMZ,
     #mir4OLD,
-    # dm7
+    dm7_y,
 )
 
 from ..HW.energy import mono_en, grating_to_1200
@@ -99,7 +99,7 @@ position_CameraWAXS_OutOfBeamPath = -94
 
 ## TODO: split into 2 dictionaries.  One that users can use and I can make a list of names to use in spreadsheet sanitization and then one dictionary that is used for one-time setup.
 default_configurations = {
-    "MirrorConfiguration_RSoXS": [
+    "Mirrors": [
         {"motor": mir1.x, "position": 1.3, "order": 0},
         {"motor": mir1.y, "position": -18, "order": 1},
         {"motor": mir1.z, "position": 0, "order": 2},
@@ -113,8 +113,36 @@ default_configurations = {
         {"motor": mir3.roll, "position": 0, "order": 4},
         {"motor": mir3.yaw, "position": 0, "order": 5},
     ],
+    ## TODO: include FOE slits here and try again to include front-end slits
 
-    "RSoXSSlitsRetracted": [
+    "SlitC_Retracted": [
+        {"motor": slitsc, "position": -3.05, "order": 0},
+    ],
+    "SlitC_NEXAFS": [
+        {"motor": slitsc, "position": -0.05, "order": 0},
+    ],
+
+    "DMRSoXS_Retracted": [
+        {"motor": izero_y, "position": 144, "order": 0},
+    ],
+    "DMRSoXS_Mesh": [
+        {"motor": izero_y, "position": -31, "order": 0},
+    ],
+    "DMRSoXS_FluorescenceScreen": [
+        {"motor": izero_y, "position": 2, "order": 0},
+    ],
+    "DMRSoXS_Photodiode": [
+        {"motor": izero_y, "position": 35, "order": 0},
+    ],
+
+    "FastShutter_Retracted": [
+        {"motor": izero_y, "position": 44, "order": 0},
+    ],
+    "FastShutter": [
+        {"motor": izero_y, "position": 2.2, "order": 0},
+    ],
+
+    "RSoXSSlits_Retracted": [
         {"motor": slits1.vsize, "position": 10, "order": 0},
         {"motor": slits1.hsize, "position": 10, "order": 0},
         {"motor": slits2.vsize, "position": 10, "order": 0},
@@ -122,40 +150,74 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 10, "order": 0},
         {"motor": slits3.hsize, "position": 10, "order": 0},
     ],
-
-    "RSoXSDetectorsRetracted": [
-        {"motor": shutter_y, "position": 44, "order": 0},
-        {"motor": izero_y, "position": 144, "order": 0},
-        #{"motor": Det_W, "position": -94, "order": 0},
-        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 3, "order": 0},
-        #{"motor": BeamStopS, "position": 3, "order": 0},
+    "RSoXSSlits_Centers": [
+        {"motor": slits1.vcenter, "position": -0.55, "order": 0},
+        {"motor": slits1.hcenter, "position": -0.18, "order": 0},
+        {"motor": slits2.vcenter, "position": -0.873, "order": 0},
+        {"motor": slits2.hcenter, "position": -0.1, "order": 0},
+        {"motor": slits3.vcenter, "position": -0.45, "order": 0},
+        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
+    ],
+    "RSoXSSlits_ApertureSizes_SolidSamples": [
+        {"motor": slits1.vsize, "position": 0.02, "order": 0},
+        {"motor": slits1.hsize, "position": 0.04, "order": 0},
+        {"motor": slits2.vsize, "position": 0.21, "order": 0},
+        {"motor": slits2.hsize, "position": 0.4, "order": 0},
+        {"motor": slits3.vsize, "position": 1, "order": 0},
+        {"motor": slits3.hsize, "position": 1, "order": 0},
+        {"motor": slitsc, "position": -3.05, "order": 2},
+    ],
+    "RSoXSSlits_ApertureSizes_LiquidSamples": [
+        {"motor": slits1.vsize, "position": 0.1, "order": 0},
+        {"motor": slits1.hsize, "position": 0.7, "order": 0},
+        {"motor": slits2.vsize, "position": 0.75, "order": 0},
+        {"motor": slits2.hsize, "position": 1.5, "order": 0},
+        {"motor": slits3.vsize, "position": 5, "order": 0},
+        {"motor": slits3.hsize, "position": 5, "order": 0},
+        {"motor": slitsc, "position": -3.05, "order": 2},
     ],
 
-    "SolidSampleRetracted": [
+    "SolidSamples_Retracted": [
         {"motor": sam_Y, "position": 345, "order": 0},  ## TODO: Might need to remove if issue with gate valve closed.  maybe make separate configuration, solid_sample_out
         {"motor": sam_X, "position": 0, "order": 0},
         {"motor": sam_Z, "position": 0, "order": 0},
         {"motor": sam_Th, "position": 0, "order": 0},
     ],
 
-    "TEMSampleRetracted": [
+    "TEMSample_Retracted": [
         {"motor": TEMZ, "position": 1, "order": 0},
     ],
 
-    "RSoXSSlits_InPosition": [
-        {"motor": slits1.vsize, "position": 0.02, "order": 0},
-        {"motor": slits1.vcenter, "position": -0.55, "order": 0},
-        {"motor": slits1.hsize, "position": 0.04, "order": 0},
-        {"motor": slits1.hcenter, "position": -0.18, "order": 0},
-        {"motor": slits2.vsize, "position": 0.21, "order": 0},
-        {"motor": slits2.vcenter, "position": -0.873, "order": 0},
-        {"motor": slits2.hsize, "position": 0.4, "order": 0},
-        {"motor": slits2.hcenter, "position": -0.1, "order": 0},
-        {"motor": slits3.vsize, "position": 1, "order": 0},
-        {"motor": slits3.vcenter, "position": -0.45, "order": 0},
-        {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
-        {"motor": slitsc, "position": -3.05, "order": 2},
+    "WAXS_Retracted": [
+        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 3, "order": 0},
+        #{"motor": Det_W, "position": -94, "order": 0},
+    ],
+    "WAXS_Beamstop": [
+        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 69.6, "order": 0},
+    ],
+    "WAXS_2D": [
+        #{"motor": Det_W, "position": 2, "order": 0},
+    ],
+
+    "SAXS_Retracted": [
+        #{"motor": BeamStopS, "position": 3, "order": 0},
+        #{"motor": Det_S, "position": -100, "order": 0},
+    ],
+    "SAXS_Beamstop": [
+        #{"motor": BeamStopS, "position": 20, "order": 0},
+    ],
+    "SAXS_2D": [
+        #{"motor": Det_S, "position": -15, "order": 0},
+    ],
+
+    ## TODO: Add PSH7 positions
+    ## TODO: Add M4 positions
+
+    "DM7_Retracted": [
+        {"motor": dm7_y, "position": 30, "order": 0}, ## Found in this state on 20260129
+    ],
+    "DM7_Photodiode": [
+        {"motor": dm7_y, "position": -12.25, "order": 0}, 
     ],
     
     ## TODO: delete configurations from here onwards if the ones below work.
@@ -305,28 +367,58 @@ default_configurations = {
     ],
 }
 
+## Construct configurations that combine the components above.
 ## Can't just copy.deepcopy configurations to piece together new configurations because the motor objects might contain references back to themselves, and then we get `RecursionError: maximum recursion depth exceeded` when we try to load `profile_collection`
 ## Instead, make a new ditionary
 default_configurations["NoBeam"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXSSlitsRetracted"]
+    for item in default_configurations["RSoXSSlits_Retracted"]
 ]
+## Not sure if this is necessary.  Had made it to run count scans when I don't have beam to test automated workflow.
 
-default_configurations["RSoXSRetracted"] = [
+default_configurations["RSoXS_Retracted"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXSSlitsRetracted"]
+    for item in default_configurations["WAXS_Retracted"] ## Protect detectors first
 ]
-default_configurations["RSoXSRetracted"].extend(
+"""
+default_configurations["RSoXS_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["SAXS_Retracted"]
+    )
+"""
+default_configurations["RSoXS_Retracted"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["RSoXSDetectorsRetracted"]
+    for item in default_configurations["SolidSamples_Retracted"] ## Protect samples next
     )
-default_configurations["RSoXSRetracted"].extend(
+default_configurations["RSoXS_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["TEMSample_Retracted"]
+    )
+default_configurations["RSoXS_Retracted"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
-    for item in default_configurations["SolidSampleRetracted"]
+    for item in default_configurations["RSoXSSlits_Retracted"]
     )
-default_configurations["RSoXSRetracted"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 3)}
-    for item in default_configurations["TEMSampleRetracted"]
+default_configurations["RSoXS_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
+    for item in default_configurations["FastShutter_Retracted"]
+    )
+default_configurations["RSoXS_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
+    for item in default_configurations["DMRSoXS_Retracted"]
+    )
+## TODO: Need to put M4 back into place.  Or maybe have that as a separate thing of restoring NEXAFS configuraiton?
+default_configurations["RSoXS_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
+    for item in default_configurations["DM7_Retracted"]
+    )
+
+default_configurations["DM7NEXAFS"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["RSoXSSlits_Centers"]
+]
+default_configurations["DM7NEXAFS"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["DM7_Photodiode"]
     )
 
 
@@ -348,7 +440,7 @@ def clear_rsoxs():
     yield from psh10.close()
 
     ## Move RSoXS out of the way
-    yield from load_configuration("RSoXSRetracted")
+    yield from load_configuration("RSoXS_Retracted")
     bl.md.update(
         {
             "RSoXS_Config": "inactive",
