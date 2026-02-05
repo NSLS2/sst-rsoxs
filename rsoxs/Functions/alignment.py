@@ -71,6 +71,8 @@ def load_samp(
     """
     
     sample_id, sample_index = get_sample_id_and_index(sample_id_or_index=sample_id_or_index)
+
+    print("Loading sample: " + str(sample_id))
     yield from move_sample(sample_id)
     RE.md.update(rsoxs_config["bar"][sample_index])
 
