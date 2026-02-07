@@ -376,6 +376,22 @@ default_configurations["NoBeam"] = [
 ]
 ## Not sure if this is necessary.  Had made it to run count scans when I don't have beam to test automated workflow.
 
+## TODO: maybe have a Detectors_Retracted_Science and Detectors_Retracted_Commissioning version where the latter includes upstream fluorescence screens like FS1, FS6, and FS7?  Unsure how to treat I0 because I do treat it as a detector for commissioning purposes.
+default_configurations["Detectors_Retracted"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["WAXS_Retracted"] ## Protect detectors first
+]
+"""
+default_configurations["Detectors_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["SAXS_Retracted"]
+    )
+"""
+default_configurations["Detectors_Retracted"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["DM7_Retracted"]
+    )
+
 default_configurations["RSoXS_Retracted"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
     for item in default_configurations["WAXS_Retracted"] ## Protect detectors first
