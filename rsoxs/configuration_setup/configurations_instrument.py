@@ -136,10 +136,10 @@ default_configurations = {
     ],
 
     "FastShutter_Retracted": [
-        {"motor": izero_y, "position": 44, "order": 0},
+        {"motor": shutter_y, "position": 44, "order": 0},
     ],
     "FastShutter": [
-        {"motor": izero_y, "position": 2.2, "order": 0},
+        {"motor": shutter_y, "position": 2.2, "order": 0},
     ],
 
     "RSoXSSlits_Retracted": [
@@ -158,7 +158,27 @@ default_configurations = {
         {"motor": slits3.vcenter, "position": -0.45, "order": 0},
         {"motor": slits3.hcenter, "position": 0.2, "order": 0},
     ],
+    ## Normally, when I have 2D detectors and am running mixed scattering and NEXAFS measurements, I want all 3 sets of slits to be set for scattering and have same slit configurations across RSoXS and NEXAFS.
+    ## However, when there is no 2D detector, only slit 1 matters
     "RSoXSSlits_ApertureSizes_SolidSamples": [
+        {"motor": slits1.vsize, "position": 0.02, "order": 0},
+        {"motor": slits1.hsize, "position": 0.04, "order": 0},
+        {"motor": slits2.vsize, "position": 10, "order": 0},
+        {"motor": slits2.hsize, "position": 10, "order": 0},
+        {"motor": slits3.vsize, "position": 10, "order": 0},
+        {"motor": slits3.hsize, "position": 10, "order": 0},
+    ],
+    "RSoXSSlits_ApertureSizes_LiquidSamples": [
+        {"motor": slits1.vsize, "position": 0.1, "order": 0},
+        {"motor": slits1.hsize, "position": 0.7, "order": 0},
+        {"motor": slits2.vsize, "position": 10, "order": 0},
+        {"motor": slits2.hsize, "position": 10, "order": 0},
+        {"motor": slits3.vsize, "position": 10, "order": 0},
+        {"motor": slits3.hsize, "position": 10, "order": 0},
+    ],
+    ## For when I have 2D detector and want to reduce slit 1 scattering.
+    ## FYI, do not "comment" out dictionary items with triple quotes.  It causes the next element to go missing.
+    "RSoXSSlits_ApertureSizes_SolidSamples_20260207": [
         {"motor": slits1.vsize, "position": 0.02, "order": 0},
         {"motor": slits1.hsize, "position": 0.04, "order": 0},
         {"motor": slits2.vsize, "position": 0.21, "order": 0},
@@ -167,7 +187,7 @@ default_configurations = {
         {"motor": slits3.hsize, "position": 1, "order": 0},
         {"motor": slitsc, "position": -3.05, "order": 2},
     ],
-    "RSoXSSlits_ApertureSizes_LiquidSamples": [
+    "RSoXSSlits_ApertureSizes_LiquidSamples_20260207": [
         {"motor": slits1.vsize, "position": 0.1, "order": 0},
         {"motor": slits1.hsize, "position": 0.7, "order": 0},
         {"motor": slits2.vsize, "position": 0.75, "order": 0},
@@ -367,6 +387,8 @@ default_configurations = {
     ],
 }
 
+
+
 ## Construct configurations that combine the components above.
 ## Can't just copy.deepcopy configurations to piece together new configurations because the motor objects might contain references back to themselves, and then we get `RecursionError: maximum recursion depth exceeded` when we try to load `profile_collection`
 ## Instead, make a new ditionary
@@ -392,16 +414,11 @@ default_configurations["Detectors_Retracted"].extend(
     for item in default_configurations["DM7_Retracted"]
     )
 
+
 default_configurations["RSoXS_Retracted"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["WAXS_Retracted"] ## Protect detectors first
+    for item in default_configurations["Detectors_Retracted"] ## Protect detectors first
 ]
-"""
-default_configurations["RSoXS_Retracted"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["SAXS_Retracted"]
-    )
-"""
 default_configurations["RSoXS_Retracted"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
     for item in default_configurations["SolidSamples_Retracted"] ## Protect samples next
@@ -422,21 +439,45 @@ default_configurations["RSoXS_Retracted"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
     for item in default_configurations["DMRSoXS_Retracted"]
     )
-## TODO: Need to put M4 back into place.  Or maybe have that as a separate thing of restoring NEXAFS configuraiton?
-default_configurations["RSoXS_Retracted"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 2)}
-    for item in default_configurations["DM7_Retracted"]
+
+
+#default_configurations["NEXAFSStation"]
+## TODO: Do things like putting M4 into place, setting energy to 270 eV, polarization to 0.
+
+default_configurations["RSoXS_Upstream"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["SlitC_Retracted"]
+]
+default_configurations["RSoXS_Upstream"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_Centers"]
+    )
+default_configurations["RSoXS_Upstream"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_ApertureSizes_SolidSamples"]
+    )
+default_configurations["RSoXS_Upstream"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["DMRSoXS_Mesh"]
+    )
+default_configurations["RSoXS_Upstream"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["FastShutter"]
     )
 
 default_configurations["DM7NEXAFS"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXSSlits_Centers"]
+    for item in default_configurations["RSoXS_Upstream"]
 ]
 default_configurations["DM7NEXAFS"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["DM7_Photodiode"]
+    for item in default_configurations["Detectors_Retracted"]
     )
-
+## Start with all detectors retracted and then bring in the desired detectors
+devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
+for item in default_configurations["DM7NEXAFS"]:
+    if item["motor"] in devices_to_update:
+        item.update(devices_to_update[item["motor"]])
 
 
 
