@@ -67,7 +67,9 @@ def run_acquisitions_queue(
     print("Starting queue")
 
     for indexAcquisition, acquisition in enumerate(queue):
+        print("\n\n")
         yield from run_acquisitions_single(acquisition=acquisition, dryrun=dryrun)
+
 
     print("\n\nFinished queue")
 
@@ -106,18 +108,25 @@ def run_acquisitions_single(
 
     parameter = "sample_id"
     if acquisition[parameter] is not None:
-        print("Loading sample: " + str(acquisition[parameter]))
-        if dryrun == False: 
-            yield from load_samp(acquisition[parameter]) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
+        yield from load_samp(
+            sample_id_or_index = acquisition[parameter], 
+            dryrun = dryrun,
+            ) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
         
 
     ## TODO: set temperature if needed, but this is lowest priority
 
     for indexAngle, sampleAngle in enumerate(acquisition["sample_angles"]):
-        print("Rotating to angle: " + str(sampleAngle))
-        ## TODO: Requires spots to be picked from image, so I have to comment when I don't have beam
-        if dryrun == False: 
-            yield from rotate_now(sampleAngle) ## TODO: What is the difference between rotate_sample and rotate_now?
+        
+        ## TODO: come up with better way to handle.
+        ## This is mainly for cases where bar image and fiducials are not run.
+        ## Rotation is either not needed or handled differently.
+        if sampleAngle != "Do not rotate":
+            ## TODO: Requires spots to be picked from image, so I have to comment when I don't have beam
+            yield from rotate_now(
+                theta = sampleAngle,
+                dryrun = dryrun,
+                ) ## TODO: What is the difference between rotate_sample and rotate_now?
         
         for indexPolarization, polarization in enumerate(acquisition["polarizations"]):
             print("Setting polarization: " + str(polarization))

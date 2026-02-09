@@ -327,6 +327,7 @@ def sanitizeAcquisition(acquisitionInput):
                                         "WAXS_LowFlux",
                                         "WAXSNEXAFS_Liquids",
                                         "WAXS_Liquids",
+                                        "DM7NEXAFS",
                                         ):
         raise ValueError("Please enter valid " + str(parameterName))
 
@@ -336,6 +337,10 @@ def sanitizeAcquisition(acquisitionInput):
     for parameterName in ["polarizations", "sample_angles"]:
         if isinstance(acquisition[parameterName], (int, float)):
             acquisition[parameterName] = [acquisition[parameterName]]
+        ## TODO: Find better way to handle cases where I do not want rotation.
+        ## e.g., Bar image and fiducials have not been scanned, and I just want to move linearly without rotation.
+        if acquisition[parameterName] == "Do not rotate":
+            acquisition[parameterName] = ["Do not rotate"]
         if not isinstance(acquisition[parameterName], (list, tuple)): raise ValueError("Please enter valid " + str(parameterName))
         else:
             for angle in acquisition[parameterName]:
