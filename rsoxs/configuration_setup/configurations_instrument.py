@@ -35,8 +35,14 @@ from ..HW.energy import mono_en, grating_to_1200
 GLOBAL_CONFIGURATION_DICT = GLOBAL_USER_STATUS.request_status_dict("RSoXS_Config")
 
 
-def load_configuration(configuration_name):
-    print("Loading configuration: " + str(configuration_name))
+def load_configuration(
+        configuration_name,
+        dryrun = False,
+):
+    print("Loading instrument configuration: " + str(configuration_name))
+
+    if dryrun == True: return
+
     yield from move_motors(configuration_name)
 
     if "NEXAFS" in configuration_name:

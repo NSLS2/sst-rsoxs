@@ -96,8 +96,10 @@ def run_acquisitions_single(
     
     parameter = "configuration_instrument"
     if acquisition[parameter] is not None:
-        print("\n\n Loading instrument configuration: " + str(acquisition[parameter]))
-        if dryrun == False: yield from load_configuration(acquisition[parameter])  
+        yield from load_configuration(
+            configuration_name = acquisition[parameter],
+            dryrun = dryrun,
+            )  
 
     ## TODO: set up diodes to high or low gain
     ## But there are issues at the moment with setup_diode_i400() and most people don't use this, so leave it for now
