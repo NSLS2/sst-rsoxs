@@ -25,6 +25,7 @@ from nbs_bl.hw import (
     sam_Z,
     sam_Y,
     sam_X,
+    TEMY,
     TEMZ,
     #mir4OLD,
     dm7_y,
@@ -176,7 +177,23 @@ default_configurations = {
     ],
     "RSoXSSlits_ApertureSizes_LiquidSamples": [
         {"motor": slits1.vsize, "position": 0.1, "order": 0},
+        {"motor": slits1.hsize, "position": 0.12, "order": 0},
+        {"motor": slits2.vsize, "position": 10, "order": 0},
+        {"motor": slits2.hsize, "position": 10, "order": 0},
+        {"motor": slits3.vsize, "position": 10, "order": 0},
+        {"motor": slits3.hsize, "position": 10, "order": 0},
+    ],
+    "RSoXSSlits_ApertureSizes_LiquidSamples_Summer2024": [
+        {"motor": slits1.vsize, "position": 0.1, "order": 0},
         {"motor": slits1.hsize, "position": 0.7, "order": 0},
+        {"motor": slits2.vsize, "position": 10, "order": 0},
+        {"motor": slits2.hsize, "position": 10, "order": 0},
+        {"motor": slits3.vsize, "position": 10, "order": 0},
+        {"motor": slits3.hsize, "position": 10, "order": 0},
+    ],
+    "RSoXSSlits_ApertureSizes_LiquidSamples_December2024": [
+        {"motor": slits1.vsize, "position": 0.02, "order": 0},
+        {"motor": slits1.hsize, "position": 0.2, "order": 0},
         {"motor": slits2.vsize, "position": 10, "order": 0},
         {"motor": slits2.hsize, "position": 10, "order": 0},
         {"motor": slits3.vsize, "position": 10, "order": 0},
@@ -213,6 +230,10 @@ default_configurations = {
     "TEMSample_Retracted": [
         {"motor": TEMZ, "position": 1, "order": 0},
     ],
+    "TEMSample": [
+        {"motor": TEMZ, "position": 139.7, "order": 0},
+        {"motor": TEMY, "position": 0.66, "order": 0},
+    ],
 
     "WAXS_Retracted": [
         {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 3, "order": 0},
@@ -244,6 +265,9 @@ default_configurations = {
     ],
     "DM7_Photodiode": [
         {"motor": dm7_y, "position": -12.25, "order": 0}, 
+    ],
+    "DM7_FS13": [
+        {"motor": dm7_y, "position": -42, "order": 0}, 
     ],
     
     ## TODO: delete configurations from here onwards if the ones below work.
@@ -471,6 +495,27 @@ default_configurations["RSoXS_Upstream"].extend(
     for item in default_configurations["FastShutter"]
     )
 
+default_configurations["RSoXS_Upstream_Liquids"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["SlitC_Retracted"]
+]
+default_configurations["RSoXS_Upstream_Liquids"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_Centers"]
+    )
+default_configurations["RSoXS_Upstream_Liquids"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_ApertureSizes_LiquidSamples"]
+    )
+default_configurations["RSoXS_Upstream_Liquids"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["DMRSoXS_Mesh"]
+    )
+default_configurations["RSoXS_Upstream_Liquids"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["FastShutter"]
+    )
+
 default_configurations["DM7NEXAFS"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
     for item in default_configurations["RSoXS_Upstream"]
@@ -485,6 +530,126 @@ for item in default_configurations["DM7NEXAFS"]:
     if item["motor"] in devices_to_update:
         item.update(devices_to_update[item["motor"]])
 
+
+configuration_name = "DM7_FluorescenceImage"
+configurations_to_combine = [
+    "RSoXS_Upstream",
+    "Detectors_Retracted"
+]
+configurations_to_overwrite = [
+    "DM7_FS13",
+]
+default_configurations[configuration_name] = []
+## First build base configuration where all detectors are retracted
+for configuration_to_combine in configurations_to_combine:
+    default_configurations[configuration_name].extend(
+        {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+        for item in default_configurations[configuration_to_combine]
+        )
+## Then bring in the desired detectors
+for configuration_to_overwrite in configurations_to_overwrite:
+    devices_to_update = {item["motor"]: item for item in default_configurations[configuration_to_overwrite]}
+    for item in default_configurations[configuration_name]:
+        if item["motor"] in devices_to_update:
+            item.update(devices_to_update[item["motor"]])
+
+
+default_configurations["DM7NEXAFS_Liquids"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["RSoXS_Upstream_Liquids"]
+]
+default_configurations["DM7NEXAFS_Liquids"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["Detectors_Retracted"]
+    )
+## Start with all detectors retracted and then bring in the desired detectors
+devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
+for item in default_configurations["DM7NEXAFS_Liquids"]:
+    if item["motor"] in devices_to_update:
+        item.update(devices_to_update[item["motor"]])
+
+
+
+
+
+
+
+
+
+
+default_configurations["RSoXS_Upstream_Liquids_Summer2024"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["SlitC_Retracted"]
+]
+default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_Centers"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_ApertureSizes_LiquidSamples_Summer2024"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["DMRSoXS_Mesh"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["FastShutter"]
+    )
+
+default_configurations["DM7NEXAFS_Liquids_Summer2024"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["RSoXS_Upstream_Liquids_Summer2024"]
+]
+default_configurations["DM7NEXAFS_Liquids_Summer2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["Detectors_Retracted"]
+    )
+## Start with all detectors retracted and then bring in the desired detectors
+devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
+for item in default_configurations["DM7NEXAFS_Liquids_Summer2024"]:
+    if item["motor"] in devices_to_update:
+        item.update(devices_to_update[item["motor"]])
+
+
+
+
+
+default_configurations["RSoXS_Upstream_Liquids_December2024"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["SlitC_Retracted"]
+]
+default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_Centers"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
+    for item in default_configurations["RSoXSSlits_ApertureSizes_LiquidSamples_December2024"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["DMRSoXS_Mesh"]
+    )
+default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["FastShutter"]
+    )
+
+default_configurations["DM7NEXAFS_Liquids_December2024"] = [
+    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
+    for item in default_configurations["RSoXS_Upstream_Liquids_December2024"]
+]
+default_configurations["DM7NEXAFS_Liquids_December2024"].extend(
+    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+    for item in default_configurations["Detectors_Retracted"]
+    )
+## Start with all detectors retracted and then bring in the desired detectors
+devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
+for item in default_configurations["DM7NEXAFS_Liquids_December2024"]:
+    if item["motor"] in devices_to_update:
+        item.update(devices_to_update[item["motor"]])
 
 
 GLOBAL_CONFIGURATION_DICT.update(default_configurations)
