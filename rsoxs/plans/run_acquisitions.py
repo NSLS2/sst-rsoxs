@@ -171,6 +171,7 @@ def run_acquisitions_single(
                         )
 
                 if acquisition["scan_type"] in ("nexafs", "rsoxs"):
+                    print("Energy parameters: " + str(acquisition["energy_list_parameters"]))
                     if acquisition["scan_type"]=="nexafs": use_2D_detector = False
                     if acquisition["scan_type"]=="rsoxs": use_2D_detector = True
                     energy_parameters = acquisition["energy_list_parameters"]
