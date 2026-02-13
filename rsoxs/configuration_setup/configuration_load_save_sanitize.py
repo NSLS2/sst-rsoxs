@@ -328,6 +328,8 @@ def sanitizeAcquisition(acquisitionInput):
                                         "WAXSNEXAFS_Liquids",
                                         "WAXS_Liquids",
                                         "DM7NEXAFS",
+                                        "DM7NEXAFS_Liquids",
+                                        "DM7NEXAFS_Liquids_December2024",
                                         ):
         raise ValueError("Please enter valid " + str(parameterName))
 
