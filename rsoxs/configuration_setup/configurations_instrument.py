@@ -98,6 +98,49 @@ def view_positions(configuration_name):
         print(motor["motor"].read())
 
 
+
+def create_hybrid_configuration(
+        new_configuration_name,
+        configurations_dictionary,
+        configurations_to_combine,
+        configurations_to_overwrite,
+):
+    """
+    Takes in a dictionary of configurations and adds a new configuration that combines existing configurations.
+    """
+
+    ## First check if the name is already taken to avoid overwriting an existing configuration
+    for configuration_name in list(configurations_dictionary.keys()):
+        if new_configuration_name == configuration_name:
+            print("Configuration name " + str(new_configuration_name) + " is already taken.  Please try again with a different configuration name.")
+            return
+    
+    ## Start with an empty value
+    configurations_dictionary[new_configuration_name] = []
+
+    ## Build base configuration where all detectors are retracted
+    for configuration_to_combine in configurations_to_combine:
+        configurations_dictionary[new_configuration_name].extend(
+            {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
+            for item in configurations_dictionary[configuration_to_combine]
+            )
+    
+    ## Then bring in the desired detectors
+    for configuration_to_overwrite in configurations_to_overwrite:
+        ## Make a new dictionary where the motor object is the dictionary key so that it can be searched in the base list.
+        ## This will ensure that all items in the list get updated regardless of what the name of the key is.  In case we add new keys in the future.
+        devices_to_update = {item["motor"]: item for item in configurations_dictionary[configuration_to_overwrite]}
+        for item in configurations_dictionary[new_configuration_name]:
+            if item["motor"] in devices_to_update:
+                item.update(devices_to_update[item["motor"]])
+
+    ## Return dictionary with added configuration
+    return configurations_dictionary
+
+
+
+
+
 position_RSoXSDiagnosticModule_OutOfBeamPath = 145
 position_RSoXSSlitAperture_FullyOpen = 10
 position_BeamstopWAXS_InBeamPath = 20 #69.6 from May 2025 to December 2025  ## Out is 3
@@ -531,27 +574,19 @@ for item in default_configurations["DM7NEXAFS"]:
         item.update(devices_to_update[item["motor"]])
 
 
-configuration_name = "DM7_FluorescenceImage"
-configurations_to_combine = [
-    "RSoXS_Upstream",
-    "Detectors_Retracted"
-]
-configurations_to_overwrite = [
-    "DM7_FS13",
-]
-default_configurations[configuration_name] = []
-## First build base configuration where all detectors are retracted
-for configuration_to_combine in configurations_to_combine:
-    default_configurations[configuration_name].extend(
-        {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-        for item in default_configurations[configuration_to_combine]
-        )
-## Then bring in the desired detectors
-for configuration_to_overwrite in configurations_to_overwrite:
-    devices_to_update = {item["motor"]: item for item in default_configurations[configuration_to_overwrite]}
-    for item in default_configurations[configuration_name]:
-        if item["motor"] in devices_to_update:
-            item.update(devices_to_update[item["motor"]])
+
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "DM7_FluorescenceImage",
+        configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
+        configurations_to_combine = [
+                "RSoXS_Upstream",
+                "Detectors_Retracted"
+            ],
+        configurations_to_overwrite = [
+                "DM7_FS13",
+            ],
+)
+
 
 
 default_configurations["DM7NEXAFS_Liquids"] = [
