@@ -9,10 +9,12 @@ from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
     mir1,
+    fs1_cam,
     fs6_cam,
     mirror2,
     grating,
     mir3,
+    fs7_cam,
     slitsc,
     slits1,
     izero_y,
@@ -22,6 +24,8 @@ from nbs_bl.hw import (
     sam_Th,
     #waxs_det,
     #Det_W,
+    fs13_cam,
+    dm7_y,
 )
 
 
@@ -147,8 +151,6 @@ def count_beam_stability():
 
 def reproduce_EPU_error():
 
-    add_current_position_as_sample(name="EPUTest", sample_id="EPUTest")
-
     for iteration in np.arange(0, 1e10, 1):
         for polarization in [0, 90, 45, 135]:
             yield from set_polarization(polarization)
@@ -253,6 +255,146 @@ def M1_parameter_sweep_FS6():
     ## TODO: In the future, sweeps of how the beam looks at different EPU gaps and phases would be good as well
     comment = comment_front_end + "  Mirror 1 x=1.3, y=-18, z=0, pitch=0.57, yaw=0, roll=0"
     yield from nbs_count(extra_dets=[fs6_cam], num=10000000000, comment=comment)
+
+
+
+
+
+def beam_motion_monitoring_FS1_20260216(
+        sample_id = "OpenBeam",
+):
+    """
+    Quick function to get started while I put together a more detailed one below.
+    """
+
+    ## Retract M1 to access FS1
+    yield from bps.mv(mir1.x, -5)
+
+    yield from load_samp("OpenBeam")
+
+    yield from set_polarization(0)
+
+    energy_parameters = [100, 100, 200, 91.65, 291.65, 8.35, 300, 100, 2000]
+    
+    for cycle in np.arange(0, 1000000, 1):
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            extra_dets = [fs1_cam],
+            )
+        yield from nbs_energy_scan(
+            *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
+            extra_dets = [fs1_cam],
+            )
+
+
+
+
+
+
+
+def beam_motion_monitoring_FS6_20260215(
+        sample_id = "OpenBeam",
+):
+    """
+    Quick function to get started while I put together a more detailed one below.
+    """
+
+    ## Bring in FS6
+    ## TODO: make device for FS6
+
+    yield from load_samp("OpenBeam")
+
+    yield from set_polarization(0)
+
+    energy_parameters = [100, 100, 200, 91.65, 291.65, 8.35, 300, 100, 2000]
+    
+    for cycle in np.arange(0, 1000000, 1):
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            extra_dets = [fs6_cam],
+            )
+        yield from nbs_energy_scan(
+            *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
+            extra_dets = [fs6_cam],
+            )
+        
+
+
+def beam_motion_monitoring_FS7_20260214(
+        sample_id = "OpenBeam",
+):
+    """
+    Quick function to get started while I put together a more detailed one below.
+    """
+
+    ## Retract M3 to access FS7
+    yield from bps.mv(mir3.x, 0)
+
+    yield from load_samp("OpenBeam")
+
+    yield from set_polarization(0)
+
+    energy_parameters = [100, 100, 200, 91.65, 291.65, 8.35, 300, 100, 2000]
+    
+    for cycle in np.arange(0, 1000000, 1):
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            extra_dets = [fs7_cam],
+            )
+        yield from nbs_energy_scan(
+            *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
+            extra_dets = [fs7_cam],
+            )
+        
+
+
+def beam_motion_monitoring_FS13_20260213(
+        sample_id = "OpenBeam",
+):
+    """
+    Quick function to get started while I put together a more detailed one below.
+    """
+
+    ## Open all slits to get big beam
+    yield from bps.mv(
+        slits1.vsize, 10,
+        slits1.hsize, 10,
+        slits2.vsize, 10,
+        slits2.hsize, 10,
+        slits3.vsize, 10,
+        slits3.hsize, 10,
+        )
+    yield from bps.mv(dm7_y, -42)
+
+    yield from load_samp("OpenBeam")
+
+    yield from set_polarization(0)
+
+    energy_parameters = [100, 100, 200, 91.65, 291.65, 8.35, 300, 100, 2000]
+    
+    for cycle in np.arange(0, 1000000, 1):
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            extra_dets = [fs13_cam],
+            )
+        yield from nbs_energy_scan(
+            *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
+            extra_dets = [fs13_cam],
+            )
+
+
+def beam_motion_monitoring(
+        sample_id = "OpenBeam",
+):
+    """
+    Repeated energy scans will be performed to assess beam motion.
+    Energy sweep reveals if beam moves with energy.
+    Extracting specified energy over time reveals if beam moves with time.
+    """
+
+    yield from load_configuration("DM7_FS13")
+
+    yield from load_samp("OpenBeam")
 
 
 
