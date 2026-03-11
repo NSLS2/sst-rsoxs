@@ -10,7 +10,7 @@ from rsoxs.Functions.alignment import (
     rotate_now
     )
 from rsoxs.HW.energy import set_polarization
-from nbs_bl.plans.scans import nbs_count, nbs_energy_scan
+from nbs_bl.plans.scans import nbs_count, nbs_list_scan, nbs_energy_scan
 from ..Functions.energyscancore import cdsaxs_scan
 from ..Functions.rsoxs_plans import do_rsoxs
 from rsoxs.plans.rsoxs import spiral_scan
@@ -21,6 +21,8 @@ from nbs_bl.hw import (
     en,
     mir1,
     fs6_cam,
+    mirror2,
+    grating,
     slitsc,
     slits1,
     izero_y,
@@ -279,95 +281,85 @@ myQueue = [
 ## Custom scripts for commissioning #################################
 
 
-def cdsaxs_20250914():
-    yield from do_cdsaxs_position_sweep()
+
+
+def commissioning_scans_20251201():
+
+    
+    yield from spirals_WSU()
+
+    yield from HOPG_energy_resolution_series()
+
+    yield from open_beam_waxs_photodiode_scans(iterations=1)
+
+    yield from count_beam_stability()
+
+    yield from zero_order_scans()
+
+    yield from WAXS_camera_position_offset_scans()
+
     yield from open_beam_waxs_photodiode_scans(iterations=1000)
+        
+    
 
 
-def TEY_20250914():
+def spirals_WSU():
 
-    yield from load_samp("OpenBeam_Rotated")
+    print("Starting WSU spirals")
+
+
+    sample_ids = [
+        #"PC0",
+        #"PC2",
+        #"PC4",
+        #"BD1-1",
+        #"BD2-1",
+        #"BD3-1",
+        #"blank",
+        "50nmPS",
+    ]
+
     yield from set_polarization(0)
-    energy_parameters = energy_list_parameters["carbon_NEXAFS"]
-    yield from nbs_energy_scan(
-                                *energy_parameters,
-                                use_2d_detector=False, 
-                                dwell=1,
-                                group_name="TEY",
-                                )
-    yield from nbs_energy_scan(
-                                *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                use_2d_detector=False, 
-                                dwell=1,
-                                group_name="TEY",
-                                )
+    yield from bps.mv(en, 270)
+
+    yield from load_configuration("WAXS")
+
+    for sample_id in sample_ids:
+        print("Loading sample: " + str(sample_id))
+        yield from load_samp(sample_id)
+
+        yield from spiral_scan(
+                        stepsize=0.3, 
+                        widthX=1.8, 
+                        widthY=1.8,
+                        n_exposures=1, 
+                        dwell=0.1,
+                        )
 
 
-    for edge in ["nitrogen_NEXAFS", "oxygen_NEXAFS"]:
+
+def count_beam_stability():
     
-        yield from load_samp("OpenBeam_Rotated")
-        yield from set_polarization(0)
-        energy_parameters = energy_list_parameters[edge]
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        yield from nbs_energy_scan(
-                                    *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        
-
-        TEY_queue = [
-            {
-                "sample_id": "ZnMIP_unexposed",
-                "configuration_instrument": "WAXSNEXAFS",
-                "scan_type": "nexafs",
-                "energy_list_parameters": edge,
-                "polarizations": [0], 
-                "cycles": 1,
-                "sample_angles": [55],
-                "group_name": "TEY",
-                "priority": 1,
-            },
-
-            {
-                "sample_id": "ZnMIP_exposed",
-                "configuration_instrument": "WAXSNEXAFS",
-                "scan_type": "nexafs",
-                "energy_list_parameters": edge,
-                "polarizations": [0], 
-                "cycles": 1,
-                "sample_angles": [55],
-                "group_name": "TEY",
-                "priority": 1,
-            },
-        ]
-        for acq in TEY_queue:
-            yield from run_acquisitions_single(acquisition=acq, dryrun=False)
-        
-
-
-        yield from load_samp("OpenBeam_Rotated")
-        yield from set_polarization(0)
-        energy_parameters = energy_list_parameters[edge]
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
-        yield from nbs_energy_scan(
-                                    *energy_parameters[::-1], ## Reverse the energy list parameters to produce reversed energy list
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    group_name="TEY",
-                                    )
+    print("Starting counting scans")
     
+    energies = np.arange(250, 350, 10)
+    exposure_times = np.arange(1, 6, 1)
+
+    yield from set_polarization(0)
+    yield from load_configuration("WAXSNEXAFS")
+    yield from load_samp("OpenBeam")
+
+    for exposure_time in exposure_times:
+        print("Exposure time: " + str(exposure_time))
+        for energy in energies:
+            print("Energy: " + str(energy))
+            yield from bps.mv(en, energy)
+
+            yield from nbs_count(
+                num=100, 
+                use_2d_detector=False, 
+                dwell=exposure_time,
+                                            )
 
 
 
@@ -375,16 +367,7 @@ def TEY_20250914():
 
 
 
-def commissioning_scans_20250913():
 
-    
-    #yield from HOPG_energy_resolution_series()
-
-    for count in np.arange(0, 1000, 1):
-        yield from open_beam_waxs_photodiode_scans(iterations=1)
-        yield from gold_mesh_contamination_kinetics(iterations=1)
-        
-    
 
         
 
@@ -592,8 +575,8 @@ def open_beam_waxs_photodiode_scans(iterations=1):
     "configuration_instrument": "WAXSNEXAFS",
     "scan_type": "nexafs",
     "energy_list_parameters": "carbon_NEXAFS",
-    "polarizations": [0, 90, 45, 135], 
-    "cycles": 1,
+    "polarizations": [0], #"polarizations": [0, 90, 45, 135], 
+    "cycles": 0,
     "group_name": "Assess PGM contamination",
     "priority": 1,
     }
@@ -647,18 +630,60 @@ def open_beam_waxs_photodiode_scans_carbon(iterations=1):
 
 
 
+def zero_order_scans():
+    ## Setting energy and polarization so that the EPU is at constant gap and phase
+    yield from bps.mv(en.polarization, 90)
+    yield from bps.mv(en, 291.65)
+    yield from bps.mv(mirror2, -4)
+    yield from bps.mv(grating, -4)
+
+    ## Start and end at safe configuraiton like WAXSNEXAFS
+    yield from load_configuration("WAXSNEXAFS")
+
+    angles_optics = np.arange(-4, -1.3, 0.2)
+
+    for sample_id in ["HOPG_new", "OpenBeam"]:
+        yield from load_samp(sample_id)
+        yield from rotate_now(20)
+
+        for angle_optics in angles_optics:
+            yield from bps.mv(grating, angle_optics)
+            yield from bps.mv(mirror2, angle_optics)
+
+            grating_angles_to_scan = np.linspace(
+                start = angle_optics - 0.08,
+                stop = angle_optics + 0.08,
+                num = 100,
+                                                )
+            
+            comment_template = "RSoXS 250 grating 0 order scans.  "
+            comment_template = comment_template + "M2 = PGM = " + str(angle_optics) + " degrees. "
+            comment_template = comment_template + str(sample_id) + ".  "
+
+            yield from nbs_list_scan(
+                grating,
+                grating_angles_to_scan,
+                comment = comment_template,
+            )
+        
+
+
+    ## Restore energy
+    yield from bps.mv(en.polarization, 90)
+    yield from bps.mv(en, 291.65)
+
+
+
 def HOPG_energy_resolution_series():
     """
     This series is especially helpful when selecting slits1.vsize to balance beam flux and energy resolution.
     Moreover, it should be run routinely during commissioning to assess energy resolution and adjust energy calibration if needed.
     """
+
+    print("Starting HOPG energy resolution series")
     
     ## Start and end at safe configuraiton like WAXSNEXAFS
     yield from load_configuration("WAXSNEXAFS")
-    
-    ## Load sample at the desired angle
-    yield from load_samp("HOPG")
-    yield from rotate_now(20)
 
     ## Set polarization and energy parameters
     yield from set_polarization(90)
@@ -671,6 +696,8 @@ def HOPG_energy_resolution_series():
         slits3.hsize, 10,
         )
 
+    slit1_vsizes = [0.01, 0.02, 0.04, 0.1, 0.2, 0.4]
+    """
     slit1_vsizes = np.concatenate(
         (
             np.arange(0.01, 0.1, 0.005),
@@ -678,15 +705,24 @@ def HOPG_energy_resolution_series():
             np.arange(1, 10, 0.5),
         )
     )
-    for slit1_vsize in slit1_vsizes:
-        yield from bps.mv(slits1.vsize, slit1_vsize)
-        yield from nbs_energy_scan(
-                                    *energy_parameters,
-                                    use_2d_detector=False, 
-                                    dwell=1,
-                                    n_exposures=1, 
-                                    group_name="EnergyResolutionSeries",
-                                    )
+    """
+
+    
+    for sample_id in ["HOPG_new"]:
+        ## Load sample at the desired angle
+        print("Loading sample: " + str(sample_id))
+        yield from load_samp(sample_id)
+        yield from rotate_now(20)
+
+        for slit1_vsize in slit1_vsizes:
+            yield from bps.mv(slits1.vsize, slit1_vsize)
+            yield from nbs_energy_scan(
+                                        *energy_parameters,
+                                        use_2d_detector=False, 
+                                        dwell=1,
+                                        n_exposures=1, 
+                                        group_name="EnergyResolutionSeries",
+                                        )
 
 
     yield from load_configuration("WAXSNEXAFS")
@@ -695,7 +731,7 @@ def HOPG_energy_resolution_series():
 
 def WAXS_camera_position_offset_scans():
 
-
+    print("Starting WAXS camera offset scans")
 
     ## SBA-15 scans with WAXS camera moved to different positions
     ## To decouple sample features from camera quadrant boundaries
@@ -703,26 +739,26 @@ def WAXS_camera_position_offset_scans():
 
     ## Load SBA-15 sample.  This sample will stay in the same position throughout all scans.
     yield from load_samp("SBA15")
-    add_current_position_as_sample(name="SBA15", sample_id="SBA15")
-
+    
     ## Trying different polarizations in case SBA-15 has some anisotropy
     #for polarization in [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180]:
-    for polarization in [0, 90, 180, 45, 135, 15, 30, 60, 75, 105, 120, 150, 165]:
+    #for polarization in [0, 90, 180, 45, 135, 15, 30, 60, 75, 105, 120, 150, 165]:
+    for polarization in [0, 90, 45, 135]:
         yield from set_polarization(polarization)
 
         ## Iterate through different WAXS camera positions
         ## The WAXS camera comes in diagonally, so it would move both to the side and further from the sample.
-        for waxs_detector_position in [2, -20, -40]:
+        for waxs_detector_position in np.arange(2, -20, -2):
             yield from bps.mv(Det_W, waxs_detector_position)
 
             ## Run an energy scan going from 100 eV to 1000 eV in 100 eV increments
             ## Running 50 repeat exposures at each energy at 0.1 s exposure time each.
-            energy_parameters = (100, 100, 1000)
+            energy_parameters = (200, 91.65, 291.65, 8.35, 300, 100, 1300)
             yield from nbs_energy_scan(
                                 *energy_parameters,
                                 use_2d_detector=True, 
                                 dwell=0.1,
-                                n_exposures=50, ## Was going to take 90 repeats, but then darks would be very infrequent 
+                                n_exposures=1, ## Was going to take 90 repeats, but then darks would be very infrequent 
                                 group_name="Assess WAXS camera quadrants",
                                 sample="SBA15",
                                 )
