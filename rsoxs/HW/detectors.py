@@ -4,13 +4,14 @@ from bluesky.preprocessors import make_decorator
 import bluesky_darkframes
 
 from ..devices.detectors import RSOXSGreatEyesDetector, SimGreatEyes
-from nbs_bl.hw import en, shutter_control, shutter_open_time, Det_S, Det_W, sam_Th, sam_X, sam_Y, waxs_det
+from nbs_bl.hw import en, shutter_control, shutter_open_time, Det_S, Det_W, sam_Th, sam_X, sam_Y #, waxs_det
 from nbs_bl.plans.scans import nbs_count
 from nbs_bl.printing import boxed_text, run_report
 from ..Functions.per_steps import trigger_and_read_with_shutter
 from ..startup import RE
 from functools import partial
 from ..HW.signals import default_sigs
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 
 run_report(__file__)
 
@@ -46,15 +47,19 @@ waxs_det.stats1.name = "WAXS fullframe"
 
 def stop_det_cooling():
     # yield from saxs_det.cooling_off()
+    waxs_det = bl["waxs_det"]
     yield from waxs_det.cooling_off_plan()
 
 
 def start_det_cooling():
     # yield from saxs_det.set_temp(-80)
+    waxs_det = bl["waxs_det"]
     yield from waxs_det.set_temp_plan(-80)
 
 
 def set_exposure(exposure):
+    waxs_det = bl["waxs_det"]
+
     if exposure > 0.001 and exposure < 1000:
         # saxs_det.set_exptime(exposure)
         waxs_det.set_exptime(exposure)
@@ -67,6 +72,7 @@ def set_exposure(exposure):
 
 
 def exposure():
+    waxs_det = bl["waxs_det"]
     return "   " + waxs_det.exposure()  # + "\n   " + waxs_det.exposure()
 
 
@@ -82,6 +88,8 @@ def snapshot(secs=0, count=1, name=None, energy=None, detn="waxs", n_exp=1):
     TODO: remove name and energy after verifying that they are not used elsewhere.  They are not used in snapwaxs.
     
     """
+    waxs_det = bl["waxs_det"]
+
     cameras_lookup = {"waxs": waxs_det} ## Used to have SAXS camera as well
     camera = cameras_lookup[detn]
    
@@ -144,7 +152,7 @@ def dark_plan(det):
 #     limit=20,
 # )
 
-
+"""
 dark_frame_preprocessor_waxs = bluesky_darkframes.DarkFramePreprocessor(
     dark_plan=dark_plan,
     detector=waxs_det,
@@ -162,6 +170,7 @@ dark_frame_preprocessor_waxs = bluesky_darkframes.DarkFramePreprocessor(
 )
 
 dark_frame_preprocessor_waxs_spirals = bluesky_darkframes.DarkFramePreprocessor(
+
     dark_plan=dark_plan,
     detector=waxs_det,
     max_age=120,
@@ -177,3 +186,5 @@ dark_frame_preprocessor_waxs_spirals = bluesky_darkframes.DarkFramePreprocessor(
 
 dark_frames_enable_waxs = make_decorator(dark_frame_preprocessor_waxs)()
 # dark_frames_enable_saxs = make_decorator(dark_frame_preprocessor_saxs)()
+
+"""

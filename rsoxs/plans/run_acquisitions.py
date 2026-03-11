@@ -17,6 +17,7 @@ from rsoxs.plans.rsoxs import spiral_scan
 from .default_energy_parameters import energy_list_parameters
 from rsoxs.HW.detectors import snapshot
 from ..startup import rsoxs_config
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
     mir1,
@@ -30,7 +31,7 @@ from nbs_bl.hw import (
     slits3,
     manipulator,
     sam_Th,
-    waxs_det,
+    #waxs_det,
     Det_W,
 )
 from ..configuration_setup.configuration_load_save_sanitize import (
@@ -870,6 +871,9 @@ def WAXS_camera_energy_polarization_series(iterations=1):
 
 ## Just copied from Eliot's code
 def do_cdsaxs(energies, samples):
+    
+    waxs_det = bl["waxs_det"]
+    
     ## If a reduction in X-ray dose is needed, then adjust the slitsc aperture size and not the exposure time.  The 9 s exposure time is necessary to ensure X-ray exposure is delivered at all angles.
     yield from bps.mv(slitsc,-1.05) # big flux
     for samp in samples:

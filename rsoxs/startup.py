@@ -11,7 +11,7 @@ import httpx
 from bluesky.preprocessors import finalize_decorator
 from bluesky.run_engine import Msg
 import bluesky.plan_stubs as bps
-from nbs_bl.run_engine import create_run_engine
+#from nbs_bl.run_engine import create_run_engine
 from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.printing import run_report
 from nbs_bl.help import print_builtins
@@ -22,7 +22,7 @@ from nbs_bl.samples import *
 from rsoxs.redis_config import rsoxs_config
 
 
-from databroker import Broker
+# from databroker import Broker
 
 run_report(__file__)
 
@@ -34,7 +34,8 @@ except ImportError:
         return False
 
 
-RE = create_run_engine(setup=True)
+# RE = create_run_engine(setup=True)
+RE = bl.run_engine
 
 if not is_re_worker_active():
     ns = get_ipython().user_ns
@@ -57,7 +58,7 @@ mdredis = redis.Redis(
     db=redis_md_settings.get("db", 0),
 )"""
 # RE.md = RedisStatusDict(mdredis, prefix=redis_md_settings.get("prefix", ""))
-RE.md = bl.md
+# RE.md = bl.md
 md = RE.md  ## The contents from md are added into the start document for the scan metadata in Tiled.
 # GLOBAL_USER_STATUS.add_status("USER_MD", RE.md)
 

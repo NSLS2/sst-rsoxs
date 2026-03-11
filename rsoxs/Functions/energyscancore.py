@@ -30,6 +30,7 @@ from ophyd import Device, Signal
 from ophyd.status import StatusTimeoutError
 import warnings
 from copy import deepcopy
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
     mir3,
@@ -43,7 +44,7 @@ from nbs_bl.hw import (
     sam_Z,
     sam_Th,
     beamstop_waxs,
-    waxs_det,
+    #waxs_det,
     Beamstop_SAXS,
     #saxs_det,
     DiodeRange,
@@ -115,6 +116,8 @@ def rsoxs_step_scan(*args, extra_dets=[], n_exposures=1, **kwargs):
     n_exposures : int, optional
         If greater than 1, take multiple exposures per step
     """
+    waxs_det = bl["waxs_det"]
+
     old_n_exp = waxs_det.number_exposures
     waxs_det.number_exposures = n_exposures
     _extra_dets = [waxs_det]
@@ -925,6 +928,8 @@ def flyer_scan_energy(scan_params, md={},locked=True,polarization=0):
 
 def cdsaxs_scan(det=None,angle_mot = None,shutter = None,start_angle=50,end_angle=85,exp_time=9,md=None):
     
+    waxs_det = bl["waxs_det"]
+
     ## Sanitize inputs that can't go directly into inputs
     det = det if det else waxs_det 
     angle_mot = angle_mot if angle_mot else sam_Th 

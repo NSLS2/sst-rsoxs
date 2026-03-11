@@ -3,16 +3,18 @@
 import bluesky.plan_stubs as bps
 from bluesky.preprocessors import finalize_wrapper
 from functools import partial
+
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
     shutter_control,
     shutter_open_time,
     sam_X,
     sam_Y,
-    waxs_det,
+    #waxs_det,
 )
 
-from nbs_bl.beamline import GLOBAL_BEAMLINE
+#from nbs_bl.beamline import GLOBAL_BEAMLINE
 from nbs_bl.printing import run_report
 from nbs_bl.plans.scans import nbs_count, nbs_gscan, nbs_spiral_square
 from nbs_bl.plans.preprocessors import wrap_metadata
