@@ -10,10 +10,10 @@ from nbs_bl.hw import (
     sam_Th,
     sam_Z,
     sam_X,
-    BeamStopS,
+    #BeamStopS,
     BeamStopW,
-    Det_W,
-    Det_S,
+    #Det_W,
+    #Det_S,
     shutter_y,
     #Izero_ds,
     izero_y,
@@ -63,19 +63,19 @@ def bsw(line):
     RE(BeamStopW.status_or_rel_move(line))
 
 
-@register_line_magic
-def bss(line):
-    RE(BeamStopS.status_or_rel_move(line))
+#@register_line_magic
+#def bss(line):
+#    RE(BeamStopS.status_or_rel_move(line))
 
 
-@register_line_magic
-def dw(line):
-    RE(Det_W.status_or_rel_move(line))
+#@register_line_magic
+#def dw(line):
+#    RE(Det_W.status_or_rel_move(line))
 
 
-@register_line_magic
-def ds(line):
-    RE(Det_S.status_or_rel_move(line))
+#@register_line_magic
+#def ds(line):
+#    RE(Det_S.status_or_rel_move(line))
 
 
 @register_line_magic
@@ -98,12 +98,12 @@ def motors(line):
             + BeamStopW.where()
             + "  bsw"
             + "\n"
-            + BeamStopS.where()
-            + "  bss"
-            + "\n"
-            + Det_W.where()
-            + "  dw"
-            + "\n"
+            #+ BeamStopS.where()
+            #+ "  bss"
+            #+ "\n"
+            #+ Det_W.where()
+            #+ "  dw"
+            #+ "\n"
             # + Det_S.where()
             # + "  ds"
             # + "\n"
@@ -123,7 +123,9 @@ def motors(line):
     )
 
 
-del x, y, z, th, ds, dw, bss, bsw, motors
+del x, y, z, th, 
+#del ds, dw, bss, 
+del bsw, motors
 
 
 # Energy

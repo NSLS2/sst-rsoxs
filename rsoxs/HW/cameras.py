@@ -1,6 +1,6 @@
 from nbs_bl.hw import(
     Side_cam,
-    DetS_cam,
+    #DetS_cam,
     izero_cam,
     Sample_cam,
     SampleViewer_cam, 
@@ -20,11 +20,11 @@ crosshair_side.y = crosshair_side.position_y
 crosshair_side.x.kind = "hinted"
 crosshair_side.y.kind = "hinted"
 #
-crosshair_saxs = DetS_cam.over1.overlay_1
-crosshair_saxs.x = crosshair_saxs.position_x
-crosshair_saxs.y = crosshair_saxs.position_y
-crosshair_saxs.x.kind = "hinted"
-crosshair_saxs.y.kind = "hinted"
+#crosshair_saxs = DetS_cam.over1.overlay_1
+#crosshair_saxs.x = crosshair_saxs.position_x
+#crosshair_saxs.y = crosshair_saxs.position_y
+#crosshair_saxs.x.kind = "hinted"
+#crosshair_saxs.y.kind = "hinted"
 #
 #
 
@@ -44,7 +44,11 @@ def crosshair_off():
 
 #
 #
-all_standard_pros = [SampleViewer_cam, Sample_cam, DetS_cam, izero_cam]
+all_standard_pros = [
+    SampleViewer_cam, Sample_cam, 
+    #DetS_cam, 
+    izero_cam
+    ]
 for camera in all_standard_pros:
     # camera.read_attrs = ['stats1', 'stats2', 'stats3', 'stats4', 'stats5']
     # getattr(camera, s).kind = 'normal'

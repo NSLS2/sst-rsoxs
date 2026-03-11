@@ -30,10 +30,10 @@ from nbs_bl.hw import (
     TEMY,
     TEMZ,
     BeamStopW,
-    Det_W,
-    Beamstop_SAXS,
-    BeamStopS,
-    Det_S,
+    #Det_W,
+    #Beamstop_SAXS,
+    #BeamStopS,
+    #Det_S,
     #dm7,
 )
 
@@ -64,6 +64,7 @@ run_report(__file__)
 
 def load_samp(
         sample_id_or_index, 
+        dryrun = False,
         ):
     """
     move to a sample location and load the metadata with the sample information from persistant sample list by index or sample_id
@@ -71,6 +72,11 @@ def load_samp(
     """
     
     sample_id, sample_index = get_sample_id_and_index(sample_id_or_index=sample_id_or_index)
+
+    print("Loading sample: " + str(sample_id))
+
+    if dryrun == True: return
+
     yield from move_sample(sample_id)
     RE.md.update(rsoxs_config["bar"][sample_index])
 
@@ -125,17 +131,24 @@ def duplicate_sample(sample_index, name_suffix):
 
 
 
-def rotate_now(theta, force=False):
+def rotate_now(
+        theta, 
+        force = False,
+        dryrun = False,
+):
     if theta is not None:
         
         ## Identify the current sample and get its metadata
         sample_id_current = RE.md["sample_id"] ## TODO: would like a better way to do this
         sample_id, sample_index = get_sample_id_and_index(sample_id_current)
         sample_dictionary_old = copy.deepcopy(rsoxs_config["bar"][sample_index])
-
-        ## Set new angle, rotate to the angle, update rsoxs_config
+        ## Set new angle
         sample_dictionary_new = copy.deepcopy(sample_dictionary_old)
         sample_dictionary_new["angle"] = theta
+
+        print("Rotating to angle: " + str(theta))
+        if dryrun == True: return
+        ## Rotate to angle, update rsoxs_config
         rotate_sample(sample_dictionary_new, force)
         rsoxs_config["bar"][sample_index] = sample_dictionary_new
         sync_rsoxs_config_to_nbs_manipulator()
@@ -285,9 +298,9 @@ def move_to_location(locs=get_sample_location()):
         slits3.hcenter: slits3.hcenter,
         shutter_y: shutter_y,
         izero_y: izero_y,
-        Det_W: Det_W,
-        Det_S: Det_S,
-        BeamStopS: BeamStopS,
+        #Det_W: Det_W,
+        #Det_S: Det_S,
+        #BeamStopS: BeamStopS,
         BeamStopW: BeamStopW,
         slitsc: slitsc,
         #dm7: dm7,
