@@ -33,7 +33,6 @@ jobs:
           rm -rf "${NBS_COLLECTION_PACKAGES}/rsoxs"
           mkdir -p "${NBS_COLLECTION_PACKAGES}/rsoxs"
           rsync -a \
-            --exclude=.git \
             --exclude=profile-collection \
             "${GITHUB_WORKSPACE}/" "${NBS_COLLECTION_PACKAGES}/rsoxs/"
 
