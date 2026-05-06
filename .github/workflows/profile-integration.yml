@@ -1,0 +1,122 @@
+name: Profile integration (pods + qs-pytest)
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  pods-integration:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NBS_COLLECTION_PACKAGES: ${{ github.workspace }}/collection_packages
+
+    steps:
+      - name: Checkout rsoxs
+        uses: actions/checkout@v6
+
+      - name: Checkout profile_collection_rsoxs (main)
+        uses: actions/checkout@v6
+        with:
+          repository: nsls2/sst-rsoxs-profile-collection
+          ref: develop
+          path: profile-collection
+
+      - name: Populate collection_packages with PR rsoxs tree
+        run: |
+          set -euo pipefail
+          mkdir -p "${NBS_COLLECTION_PACKAGES}"
+          rm -rf "${NBS_COLLECTION_PACKAGES}/rsoxs"
+          mkdir -p "${NBS_COLLECTION_PACKAGES}/rsoxs"
+          rsync -a \
+            --exclude=.git \
+            --exclude=profile-collection \
+            "${GITHUB_WORKSPACE}/" "${NBS_COLLECTION_PACKAGES}/rsoxs/"
+
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.9.5
+        with:
+          cache: true
+          environments: pods
+          frozen: true
+          manifest-path: profile-collection/pixi.toml
+
+      - name: Pods CLI smoke test
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          pixi run -e pods pods -- --help
+          pixi run -e pods podman-compose --version || true
+          pixi run -e pods pods-list | tee "${GITHUB_WORKSPACE}/pods-list.txt"
+          grep -q "Available services" "${GITHUB_WORKSPACE}/pods-list.txt"
+
+      - name: Start bluesky-services
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          podman --version
+          podman info --debug || true
+          pixi run -e pods pods-start bluesky-services
+          for i in $(seq 1 60); do
+            echo "wait_iter=${i}"
+            timeout 10s podman ps --format '{{.Names}}' | tee "${GITHUB_WORKSPACE}/podman-ps.txt"
+            if grep -q "bluesky-services_mongo" "${GITHUB_WORKSPACE}/podman-ps.txt" && grep -q "bluesky-services_kafka" "${GITHUB_WORKSPACE}/podman-ps.txt"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timed out waiting for bluesky-services to be running." >&2
+          podman ps -a || true
+          podman logs --tail 200 "$(podman ps -aq)" || true
+          exit 1
+
+      - name: Start ADSim
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          pixi run -e pods pods-start adsim
+          for _ in $(seq 1 60); do
+            timeout 10s podman ps --format '{{.Names}}' | tee "${GITHUB_WORKSPACE}/podman-ps.txt"
+            if grep -q "adsim" "${GITHUB_WORKSPACE}/podman-ps.txt"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timed out waiting for ADSim to be running." >&2
+          podman ps -a || true
+          podman logs --tail 200 "$(podman ps -aq)" || true
+          exit 1
+
+      - name: Start sim
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          pixi run -e pods pods-start sim
+          for _ in $(seq 1 60); do
+            timeout 10s podman ps --format '{{.Names}}' | tee "${GITHUB_WORKSPACE}/podman-ps.txt"
+            if grep -q "sim_sim" "${GITHUB_WORKSPACE}/podman-ps.txt"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timed out waiting for sim to be running." >&2
+          podman ps -a || true
+          podman logs --tail 200 "$(podman ps -aq)" || true
+          exit 1
+
+      - name: Start queueserver test
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          pixi run -e pods pods-start --test queueserver
+
+      - name: Tear down minimal pods
+        if: ${{ always() }}
+        working-directory: profile-collection
+        run: |
+          set -euo pipefail
+          pixi run -e pods pods-stop queueserver sim bluesky-services || true
+          podman ps -a || true
