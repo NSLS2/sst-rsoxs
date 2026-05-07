@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "rsoxs"
@@ -10,19 +10,22 @@ authors = [
     {name = "Eliot Gann", email = "egann@bnl.gov"},
 ]
 description = "RSoXS Beamline Framework"
-dynamic = ["version", "dependencies"]
+dynamic = ["version"]
+dependencies = [
+  "bluesky",
+  "nbs-bl",
+  "sst_base",
+  "bluesky-darkframes",
+  "slackclient",
+]
+
 requires-python = ">=3.9"
 
 [project.urls]
 homepage = "https://github.com/NSLS-II-SST/rsoxs"
 
-[tool.setuptools]
-packages = ["rsoxs"]
-
-[tool.setuptools_scm]
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+[tool.hatch.version]
+source = "vcs"
 
 [project.entry-points."nbs_gui.plans"]
 rsoxs-custom-scan = "rsoxs.qt.plans.rsoxsCustom:RSoXSCustomWidget"
