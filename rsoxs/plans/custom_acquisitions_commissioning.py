@@ -17,12 +17,14 @@ from nbs_bl.hw import (
     mir3,
     fs7_cam,
     slitsc,
+    sst_control,
     slits1,
     izero_cam,
     izero_y,
     slits2,
     slits3,
     manipulator,
+    sam_X,
     sam_Th,
     #waxs_det,
     #Det_W,
@@ -30,7 +32,7 @@ from nbs_bl.hw import (
     dm7_y,
 )
 
-
+from ..run_engine import md ## TODO: Is there a better way to do this?
 from rsoxs.configuration_setup.configurations_instrument import load_configuration
 from rsoxs.Functions.alignment import (
     #load_configuration, 
@@ -40,50 +42,146 @@ from rsoxs.Functions.alignment import (
 from rsoxs.HW.energy import set_polarization
 from ..alignment.m3 import *
 from ..alignment.energy_calibration import *
+from .cdsaxs import cdsaxs_scan
 
 
 
 
 
+def beam_time_startup():
+    """
+    Automates steps taken during beam time startup so that wiki will not have to be referred to, and steps will not have to be done separately and manually.
+    """
+
+    
+    print("The currently active proposal is ")
+    ## TODO: Is there a better way to do this than calling RE.md?
+    print("proposal_id: " + str(md["proposal"]["proposal_id"]))
+    print("title: " + str(md["proposal"]["title"]))
+    print("pi_name: " + str(md["proposal"]["pi_name"]))
+    print("\n")
+    print("Is this the correct proposal? (y/n)")
+    authenticated = input()
+    if authenticated != "y": 
+        ## TODO: Put instructions for using the GUI once the commissioning/GU proposal transition is fixed
+        print("Please authenticate into the correct beam time proposal using sync-experiment.")
+        print("To authenticate, open a new tab in the terminal and run the following command: ")
+        print("sync-experiment -b SST1 -e rsoxs -p YOUR_PROPOSAL_NUMBER")
+        print("You will be prompted for a username and password.  At the moment, a two-factor authentication push notification is not sent, but this may change.")
+        ## -b is for beamline, -e is for endstation, -p is for proposal number
+        ## The verbosity can be defined at the end of the command as needed (e.g., -v --verbose, -v --no-verbose)
+        return
+    
+    print("Have you obtained confirmation from other SST staff and/or prior users that they are not using the soft beam? (y/n)")
+    soft_beam_not_being_used = input()
+    if soft_beam_not_being_used != "y":
+        print("Please check that the soft beam is not being used to avoid disrupting someone else's measurement.")
+
+    
+    ## TODO: make new device, e.g., select_active_end_station, which has _target = ophyd.EpicsSignal, not EpicsSignalRO, so that I could change to RSoXS
+    ## TODO: use select_active_end_station.set("RSoXS") instead of yield from bps.mv(sst_control, "RSoXS")
+    ## Latter will use RE, but we have a suspender if RSoXS is not the active station
+    #print("Changing active endstation to RSoXS.")
+    #yield from bps.mv(sst_control, "RSoXS")
+
+    ## TODO: Probably have separate functions for changing grating and loading safe RSoXS configuration
+    ## TODO: For changing the grating, probably want to ultimately edit the grating_to_rsoxs function in sst_base directly, but test here first.
+    ## Want to have it check O2 bleed levels before making any movements.
+    
+    ## TODO: automate protocol outlined here: https://wiki-nsls2.bnl.gov/beamline7ID1/index.php?title=Beam_time_workflow_and_Bluesky_guide#Beam_time_startup
 
 
 
 
-def commissioning_scans_20260315():
+def test_scans_prefect():
+    """
+    Prefect is used to write out 1D detector data to csv files and 2D detector data to tiff files.
+    The scans in this function will be used to test if the workflows are correctly writing out files.
 
-    #comment = "SRS570 sensitivities: I0 = 1 nA/V, TEY = 20 pA/V, DM7 photodiode = 50 nA/V"
-    #comment = "SRS570 sensitivities: I0 = 100 pA/V, TEY = 20 pA/V, DM7 photodiode = 100 nA/V"
-    comment = "SRS570 sensitivities: I0 = 1 nA/V, TEY = 20 nA/V, DM7 photodiode = 2 uA/V"
+    """
+
+    comment = "Test scan to ensure data is written out by Prefect."
+
+    ## Test scan where multiple darks are taken in one scan
+    sam_X_to_scan = np.arange(0, 0.3, 0.1)
+    yield from nbs_list_scan(sam_X, sam_X_to_scan, use_2d_detector=True, dwell=1, n_exposures=1, comment=comment)
+
+    ## Test scan with repeat exposures on CCD
+    yield from nbs_count(
+        use_2d_detector = True,
+        num = 3,
+        n_exposures = 3,
+        dwell = 1,
+        comment = comment,
+        )
+    
+    ## Test scans with CCD without repeat exposures
+    yield from nbs_count(
+        use_2d_detector = True,
+        num = 3,
+        n_exposures = 1,
+        dwell = 1,
+        comment = comment,
+        )
+    
+    ## Test scans without CCD
+    yield from nbs_count(
+        use_2d_detector = False,
+        num = 3,
+        n_exposures = 1,
+        dwell = 1,
+        comment = comment,
+        )
 
 
+
+def commissioning_scans_20260406():
+
+    comment = "SRS570 sensitivities: I0 = 1 nA/V, TEY = 100 pA/V, WAXS photodiode = 10 nA/V"
+
+    
+    for iteration in np.arange(0, 1, 1):
+        for polarization in [90]: #[0, 90, 45, 135]:
+            yield from set_polarization(polarization)
+
+            yield from load_samp("OpenBeam_HOPG")
+            yield from nbs_energy_scan(250, 1.28, 282, 0.3, 297, 1.325, 350, comment = comment)
+            yield from nbs_energy_scan(370, 1, 397, 0.2, 407, 1, 440, comment = comment)
+            yield from nbs_energy_scan(500, 1, 525, 0.2, 540, 1, 560, comment = comment)
+            yield from nbs_energy_scan(650, 1.5, 680, 0.25, 700, 1.25, 740, comment = comment)
+
+    
+
+
+
+
+def commissioning_scans_20260328():
+
+    comment = "SRS570 sensitivities: I0 = 100 pA/V, TEY = 20 pA/V, DM7 photodiode = 200 nA/V"
+
+
+    energies_250grating_default = np.concatenate((
+        np.array([90, 110, 130, 150, 200, 250]),
+        np.arange(300, 1100, 100)
+    ))
+    energies_1200grating_default = np.concatenate((
+        energies_250grating_default,
+        np.arange(1100, 2100, 100)
+    ))
     m3_pitches_to_scan = np.arange(7.6, 8, 0.002)
+    m3_xs = np.arange(24, 24.5, 0.05)
     yield from m3_sweep(
-            polarizations = [0],
-            energies = None,
-            m3_xs = [24.2],
-            m3_pitches = m3_pitches_to_scan,
-            configuration = "DM7NEXAFS",
-            sample_id = "OpenBeam",
-
-    )
-    for energy in np.arange(900, 100, -50):
-        yield from bps.mv(en, energy)
-    m3_pitches_to_scan = np.arange(8, 7.6, -0.002)
-    yield from m3_sweep(
-            polarizations = [0],
-            energies = None,
-            m3_xs = [24.2],
+            polarizations = [90, 0],
+            energies = energies_1200grating_default,
+            m3_xs = m3_xs,
             m3_pitches = m3_pitches_to_scan,
             configuration = "DM7NEXAFS",
             sample_id = "OpenBeam",
 
     )
 
-
-    yield from beam_motion_monitoring_20260313()
-    
-    
-    
+    print("Starting open-beam energy scans")
+    yield from load_configuration("DM7NEXAFS")
     for iteration in np.arange(0, 1000, 1):
         for polarization in [0, 90, 45, 135]:
             yield from set_polarization(polarization)
@@ -993,7 +1091,23 @@ def do_cdsaxs(energies, samples):
     for samp in samples:
         yield from load_samp(samp)
         yield from bps.mv(sam_Th,-70)
-        yield from do_rsoxs(edge=energies,frames=1,exposure=.1,md={'plan_name':f'CD_20deg'})
+        #yield from do_rsoxs(edge=energies,frames=1,exposure=.1,md={'plan_name':f'CD_20deg'})
+        ## TODO: Below needs testing, but getting rid of do_rsoxs
+        
+        ## Creating energy parameters list that works with nbs scans
+        energy_parameters = [energies[0]]
+        for energy in energies[1:]:
+            energy_parameters.extend([
+                (energy - energy_parameters[-1]), ## Step size
+                energy, ## Energy region end point
+            ])
+
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            use_2d_detector = True,
+            dwell = 0.1,
+            comment = f'CD_20deg',
+        )
 
 
 def do_just_rsoxs(energies, samples):
@@ -1004,12 +1118,30 @@ def do_just_rsoxs(energies, samples):
     for samp in samples:
         yield from load_samp(samp)
         yield from bps.mv(sam_Th, -70)
+        """
         yield from do_rsoxs(
             edge = energies, 
             frames = 1,
             exposure = 0.1,
             md = {"plan_name": f"CD_20deg", "RSoXS_Main_DET": "WAXS"},
             )
+        """
+        ## TODO: Below needs testing, but getting rid of do_rsoxs
+
+        ## Creating energy parameters list that works with nbs scans
+        energy_parameters = [energies[0]]
+        for energy in energies[1:]:
+            energy_parameters.extend([
+                (energy - energy_parameters[-1]), ## Step size
+                energy, ## Energy region end point
+            ])
+
+        yield from nbs_energy_scan(
+            *energy_parameters,
+            use_2d_detector = True,
+            dwell = 0.1,
+            comment = f'CD_20deg',
+        )
         
 
 def do_cdsaxs_position_sweep():

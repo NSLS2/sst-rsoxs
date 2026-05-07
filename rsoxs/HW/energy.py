@@ -1,25 +1,16 @@
 import bluesky.plan_stubs as bps
 import bluesky.plans as bp
-from sst_base.energy import (
-    EnPos,
+from sst_base.energy.soft import (
     base_set_polarization,
 )
 from nbs_bl.hw import (
     psh4,
     en,
-    grating,
-    mirror2,
-    shutter_control,
-    Sample_TEY,
-    sam_Th,
-    sam_X,
-    sam_Y
 )
 from ophyd import EpicsSignal
 from nbs_bl.printing import run_report
 # from ..startup import bec
 
-from sst_base.detectors.scalar import I400SingleCh
 
 run_report(__file__)
 

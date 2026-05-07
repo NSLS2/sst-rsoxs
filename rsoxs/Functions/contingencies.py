@@ -3,7 +3,7 @@ import datetime, os
 import logging
 
 global no_notifications_until
-from ..startup import RE
+from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from ..HW.slackbot import rsoxs_bot
 from nbs_bl.hw import (
     sam_X, 
@@ -30,6 +30,7 @@ from nbs_bl.printing import run_report
 
 run_report(__file__)
 
+RE = bl.run_engine
 
 def pause_notices(until=None, **kwargs):
     # pause_notices turns off emails on errors either until a specified time or for a specified duration.

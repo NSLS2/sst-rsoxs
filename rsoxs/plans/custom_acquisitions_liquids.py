@@ -12,8 +12,7 @@ from nbs_bl.hw import (
     TEMZ,
 )
 from nbs_bl.plans.scans import nbs_count
-
-from ..startup import rsoxs_config
+from ..redis_config import rsoxs_config
 from ..Functions.alignment import (
     get_sample_id_and_index, 
     duplicate_sample, 

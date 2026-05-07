@@ -238,7 +238,8 @@ class RSOXSGreatEyesDetector(SingleTriggerV33, GreatEyesDetector):
         return res
 
     def skinnystage(self, *args, **kwargs):
-        yield Msg("stage", super())
+        super().stage()
+        #yield Msg("stage", super())
 
     def shutter(self):
         switch = {0: "disabled", 1: "enabled", 3: "unknown", 4: "unknown", 2: "enabled"}
@@ -268,7 +269,8 @@ class RSOXSGreatEyesDetector(SingleTriggerV33, GreatEyesDetector):
         return [self].append(super().unstage(*args, **kwargs))
 
     def skinnyunstage(self, *args, **kwargs):
-        yield Msg("unstage", super())
+        #yield Msg("unstage", super())
+        super().unstage()
 
     def set_exptime(self, secs):
         self.cam.acquire_time.set(secs).wait()

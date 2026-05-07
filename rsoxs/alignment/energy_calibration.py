@@ -34,7 +34,6 @@ def calibrate_pgm_offsets(
     search_ratio = 30,
     scan_time = 30,
 ):
-    # RE(load_sample(sample_by_name(bar, 'HOPG')))
     # RE(tune_pgm(cs=[1.35,1.37,1.385,1.4,1.425,1.45],ms=[1,1,1,1,1],energy=291.65,pol=90,k=250))
     # RE(tune_pgm(cs=[1.55,1.6,1.65,1.7,1.75,1.8],ms=[1,1,1,1,1],energy=291.65,pol=90,k=1200))
 

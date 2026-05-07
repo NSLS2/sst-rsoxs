@@ -8,6 +8,7 @@ import bluesky.plan_stubs as bps
 from nbs_bl.printing import run_report
 from nbs_bl.hw import (
     mir1,
+    slits_foe,
     en,
     mir3,
     psh10,
@@ -17,7 +18,7 @@ from nbs_bl.hw import (
     izero_y,
     slits2,
     slits3,
-    #Det_W,
+    Det_W,
     # Det_S,
     #BeamStopS,
     BeamStopW,
@@ -27,7 +28,7 @@ from nbs_bl.hw import (
     sam_X,
     TEMY,
     TEMZ,
-    #mir4OLD,
+    mir4,
     dm7_y,
 )
 
@@ -87,7 +88,9 @@ def move_motors(configuration_name):
         for indexMotor, motor in enumerate(configuration_setpoints_sorted):
             if motor["order"] == order:
                 move_list.extend([motor["motor"], motor["position"]])
-        yield from bps.mv(*move_list)
+        ## Below is to avoid empty list error in case a particular order does not have any motors
+        if move_list:
+            yield from bps.mv(*move_list)
 
 
 ## TODO: this is an example of a function I would want available in bsui_local, but wouldn't be available on a personal computer
@@ -149,7 +152,9 @@ position_CameraWAXS_OutOfBeamPath = -94
 
 ## TODO: split into 2 dictionaries.  One that users can use and I can make a list of names to use in spreadsheet sanitization and then one dictionary that is used for one-time setup.
 default_configurations = {
-    "Mirrors": [
+    ## Grouping mirrors together 
+    ## Hexapod positions are not always reproducible, so ideally, these should only be moved once during the beam time and left in place afterward.
+    "mirrors": [
         {"motor": mir1.x, "position": 1.3, "order": 0},
         {"motor": mir1.y, "position": -18, "order": 1},
         {"motor": mir1.z, "position": 0, "order": 2},
@@ -159,11 +164,53 @@ default_configurations = {
         {"motor": mir3.x, "position": 24.2, "order": 0},
         {"motor": mir3.y, "position": 18, "order": 1},
         {"motor": mir3.z, "position": 0, "order": 2},
-        {"motor": mir3.pitch, "position": 7.84, "order": 3},
+        {"motor": mir3.pitch, "position": 7.72, "order": 3},
         {"motor": mir3.roll, "position": 0, "order": 4},
         {"motor": mir3.yaw, "position": 0, "order": 5},
+        {"motor": mir4.x, "position": 0, "order": 0},
+        {"motor": mir4.y, "position": -10, "order": 1},
+        {"motor": mir4.z, "position": 0, "order": 2},
+        {"motor": mir4.pitch, "position": 0, "order": 3},
+        {"motor": mir4.roll, "position": 0, "order": 4},
+        {"motor": mir4.yaw, "position": 0, "order": 5},
     ],
     ## TODO: include FOE slits here and try again to include front-end slits
+    "mirrors_nexafs": [
+        ## Ideally, M1 and M3 positions should remain  the same for all end stations, but we see some differences in practice so far
+        {"motor": mir1.x, "position": 1.3, "order": 0},
+        {"motor": mir1.y, "position": -18, "order": 1},
+        {"motor": mir1.z, "position": 0, "order": 2},
+        {"motor": mir1.pitch, "position": 0.57, "order": 3},
+        {"motor": mir1.roll, "position": 0, "order": 4},
+        {"motor": mir1.yaw, "position": 0, "order": 5},
+        {"motor": mir3.x, "position": 24.2, "order": 0},
+        {"motor": mir3.y, "position": 18, "order": 1},
+        {"motor": mir3.z, "position": 0, "order": 2},
+        {"motor": mir3.pitch, "position": 7.68, "order": 3},
+        {"motor": mir3.roll, "position": 0, "order": 4},
+        {"motor": mir3.yaw, "position": 0, "order": 5},
+        ## Below are the positions used for LARIAT, so can update these later with more suitable positions
+        {"motor": mir4.x, "position": -27, "order": 0},
+        {"motor": mir4.y, "position": 2, "order": 1},
+        {"motor": mir4.z, "position": 0, "order": 2},
+        {"motor": mir4.pitch, "position": -1.4, "order": 3},
+        {"motor": mir4.roll, "position": 0, "order": 4},
+        {"motor": mir4.yaw, "position": 0, "order": 5},
+    ],
+
+    "FOESlits_HighFlux": [
+        {"motor": slits_foe.vcenter, "position": 0, "order": 0},
+        {"motor": slits_foe.vsize, "position": 10, "order": 0},
+        {"motor": slits_foe.hcenter, "position": -1, "order": 0},
+        {"motor": slits_foe.hsize, "position": 8, "order": 0},
+    ],
+    "FOESlits_Attenuated": [
+        {"motor": slits_foe.vcenter, "position": 0, "order": 0},
+        {"motor": slits_foe.vsize, "position": 10, "order": 0},
+        {"motor": slits_foe.hcenter, "position": 1.55, "order": 0},
+        {"motor": slits_foe.hsize, "position": -0.28, "order": 0},
+    ],
+
 
     "SlitC_Retracted": [
         {"motor": slitsc, "position": -3.05, "order": 0},
@@ -213,10 +260,10 @@ default_configurations = {
     "RSoXSSlits_ApertureSizes_SolidSamples": [
         {"motor": slits1.vsize, "position": 0.02, "order": 0},
         {"motor": slits1.hsize, "position": 0.04, "order": 0},
-        {"motor": slits2.vsize, "position": 10, "order": 0},
-        {"motor": slits2.hsize, "position": 10, "order": 0},
-        {"motor": slits3.vsize, "position": 10, "order": 0},
-        {"motor": slits3.hsize, "position": 10, "order": 0},
+        {"motor": slits2.vsize, "position": 0.21, "order": 0},
+        {"motor": slits2.hsize, "position": 0.4, "order": 0},
+        {"motor": slits3.vsize, "position": 1, "order": 0},
+        {"motor": slits3.hsize, "position": 1, "order": 0},
     ],
     "RSoXSSlits_ApertureSizes_LiquidSamples": [
         {"motor": slits1.vsize, "position": 0.1, "order": 0},
@@ -226,33 +273,17 @@ default_configurations = {
         {"motor": slits3.vsize, "position": 10, "order": 0},
         {"motor": slits3.hsize, "position": 10, "order": 0},
     ],
-    "RSoXSSlits_ApertureSizes_LiquidSamples_Summer2024": [
-        {"motor": slits1.vsize, "position": 0.1, "order": 0},
-        {"motor": slits1.hsize, "position": 0.7, "order": 0},
+    "RSoXSSlits_ApertureSizes_BroadbandReflectivity": [
+        {"motor": slits1.vsize, "position": 1.0, "order": 0},
+        {"motor": slits1.hsize, "position": 0.04, "order": 0},
         {"motor": slits2.vsize, "position": 10, "order": 0},
         {"motor": slits2.hsize, "position": 10, "order": 0},
         {"motor": slits3.vsize, "position": 10, "order": 0},
         {"motor": slits3.hsize, "position": 10, "order": 0},
     ],
-    "RSoXSSlits_ApertureSizes_LiquidSamples_December2024": [
-        {"motor": slits1.vsize, "position": 0.02, "order": 0},
-        {"motor": slits1.hsize, "position": 0.2, "order": 0},
-        {"motor": slits2.vsize, "position": 10, "order": 0},
-        {"motor": slits2.hsize, "position": 10, "order": 0},
-        {"motor": slits3.vsize, "position": 10, "order": 0},
-        {"motor": slits3.hsize, "position": 10, "order": 0},
-    ],
+    
     ## For when I have 2D detector and want to reduce slit 1 scattering.
     ## FYI, do not "comment" out dictionary items with triple quotes.  It causes the next element to go missing.
-    "RSoXSSlits_ApertureSizes_SolidSamples_20260207": [
-        {"motor": slits1.vsize, "position": 0.02, "order": 0},
-        {"motor": slits1.hsize, "position": 0.04, "order": 0},
-        {"motor": slits2.vsize, "position": 0.21, "order": 0},
-        {"motor": slits2.hsize, "position": 0.4, "order": 0},
-        {"motor": slits3.vsize, "position": 1, "order": 0},
-        {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slitsc, "position": -3.05, "order": 2},
-    ],
     "RSoXSSlits_ApertureSizes_LiquidSamples_20260207": [
         {"motor": slits1.vsize, "position": 0.1, "order": 0},
         {"motor": slits1.hsize, "position": 0.7, "order": 0},
@@ -279,14 +310,19 @@ default_configurations = {
     ],
 
     "WAXS_Retracted": [
-        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 3, "order": 0},
-        #{"motor": Det_W, "position": -94, "order": 0},
+        {"motor": BeamStopW, "position": 3, "order": 0},
+        {"motor": Det_W, "position": -94, "order": 0},
     ],
     "WAXS_Beamstop": [
-        {"motor": BeamStopW, "position": 20, "order": 0}, #{"motor": BeamStopW, "position": 69.6, "order": 0},
+        {"motor": BeamStopW, "position": 67.4, "order": 0},
     ],
     "WAXS_2D": [
-        #{"motor": Det_W, "position": 2, "order": 0},
+        {"motor": BeamStopW, "position": 67.4, "order": 0},
+        {"motor": Det_W, "position": 2, "order": 1}, ## Get the beamstop in before the camera
+    ],
+    ## Use with caution
+    "WAXS_DirectBeam": [
+        {"motor": Det_W, "position": 2, "order": 0},
     ],
 
     "SAXS_Retracted": [
@@ -304,7 +340,7 @@ default_configurations = {
     ## TODO: Add M4 positions, vertical = -10 to move out of the way.  All positions = 0 when it is in the way.
 
     "DM7_Retracted": [
-        {"motor": dm7_y, "position": 30, "order": 0}, ## Found in this state on 20260129
+        {"motor": dm7_y, "position": 80, "order": 0}, 
     ],
     "DM7_Photodiode": [
         {"motor": dm7_y, "position": -12.25, "order": 0}, 
@@ -338,26 +374,7 @@ default_configurations = {
         {"motor": BeamStopW, "position": position_BeamstopWAXS_InBeamPath, "order": 1},
         #{"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
     ],
-    "WAXSNEXAFS": [
-        {"motor": TEMZ, "position": 1, "order": 0},
-        {"motor": slits1.vsize, "position": 0.02, "order": 0},
-        {"motor": slits1.vcenter, "position": -0.55, "order": 0},
-        {"motor": slits1.hsize, "position": 0.04, "order": 0},
-        {"motor": slits1.hcenter, "position": -0.18, "order": 0},
-        {"motor": slits2.vsize, "position": 0.21, "order": 0},
-        {"motor": slits2.vcenter, "position": -0.873, "order": 0},
-        {"motor": slits2.hsize, "position": 0.4, "order": 0},
-        {"motor": slits2.hcenter, "position": -0.1, "order": 0},
-        {"motor": slits3.vsize, "position": 1, "order": 0},
-        {"motor": slits3.vcenter, "position": -0.45, "order": 0},
-        {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
-        {"motor": shutter_y, "position": 2.2, "order": 0},
-        {"motor": izero_y, "position": -31, "order": 0},
-        #{"motor": Det_W, "position": position_CameraWAXS_OutOfBeamPath, "order": 1},
-        {"motor": BeamStopW, "position": position_BeamstopWAXS_InBeamPath, "order": 1},
-        {"motor": slitsc, "position": -3.05, "order": 2},
-    ],
+    
     "WAXSNEXAFS_LowFlux": [
         {"motor": TEMZ, "position": 1, "order": 0},
         {"motor": slits1.vsize, "position": 0.02, "order": 0},
@@ -378,26 +395,7 @@ default_configurations = {
         {"motor": BeamStopW, "position": position_BeamstopWAXS_InBeamPath, "order": 1},
         {"motor": slitsc, "position": -1.05, "order": 2},  # -0.05
     ],
-    "WAXS": [
-        {"motor": TEMZ, "position": 1, "order": 0},
-        {"motor": slits1.vsize, "position": 0.02, "order": 0},
-        {"motor": slits1.vcenter, "position": -0.55, "order": 0},
-        {"motor": slits1.hsize, "position": 0.04, "order": 0},
-        {"motor": slits1.hcenter, "position": -0.18, "order": 0},
-        {"motor": slits2.vsize, "position": 0.21, "order": 0},
-        {"motor": slits2.vcenter, "position": -0.873, "order": 0},
-        {"motor": slits2.hsize, "position": 0.4, "order": 0},
-        {"motor": slits2.hcenter, "position": -0.1, "order": 0},
-        {"motor": slits3.vsize, "position": 1, "order": 0},
-        {"motor": slits3.vcenter, "position": -0.45, "order": 0},
-        {"motor": slits3.hsize, "position": 1, "order": 0},
-        {"motor": slits3.hcenter, "position": 0.2, "order": 0},
-        {"motor": shutter_y, "position": 2.2, "order": 0},
-        {"motor": izero_y, "position": -31, "order": 0},
-        #{"motor": Det_W, "position": position_CameraWAXS_InBeamPath, "order": 1},
-        {"motor": BeamStopW, "position": position_BeamstopWAXS_InBeamPath, "order": 1},
-        {"motor": slitsc, "position": -3.05, "order": 2},
-    ],
+    
     "WAXS_LowFlux": [
         {"motor": TEMZ, "position": 1, "order": 0},
         {"motor": slits1.vsize, "position": 0.02, "order": 0},
@@ -462,35 +460,35 @@ default_configurations = {
 
 
 
+
 ## Construct configurations that combine the components above.
 ## Can't just copy.deepcopy configurations to piece together new configurations because the motor objects might contain references back to themselves, and then we get `RecursionError: maximum recursion depth exceeded` when we try to load `profile_collection`
 ## Instead, make a new ditionary
-default_configurations["NoBeam"] = [
+default_configurations["NoBeam_WAXS"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
     for item in default_configurations["RSoXSSlits_Retracted"]
 ]
 ## Not sure if this is necessary.  Had made it to run count scans when I don't have beam to test automated workflow.
 
 ## TODO: maybe have a Detectors_Retracted_Science and Detectors_Retracted_Commissioning version where the latter includes upstream fluorescence screens like FS1, FS6, and FS7?  Unsure how to treat I0 because I do treat it as a detector for commissioning purposes.
-default_configurations["Detectors_Retracted"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["WAXS_Retracted"] ## Protect detectors first
-]
-"""
-default_configurations["Detectors_Retracted"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["SAXS_Retracted"]
-    )
-"""
-default_configurations["Detectors_Retracted"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["DM7_Retracted"]
-    )
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "detectors_retracted",
+        configurations_dictionary = default_configurations, 
+        configurations_to_combine = [
+                "WAXS_Retracted",
+                #"SAXS_Retracted", ## No SAXS detector currently
+                #"DM7_Retracted", ## It is a detector, technically, but there is no need to move it in/out multiple times during an RSoXS beamline
+            ],
+        configurations_to_overwrite = [
+                
+            ],
+)
+
 
 
 default_configurations["RSoXS_Retracted"] = [
     {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["Detectors_Retracted"] ## Protect detectors first
+    for item in default_configurations["detectors_retracted"] ## Protect detectors first
 ]
 default_configurations["RSoXS_Retracted"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
@@ -522,6 +520,7 @@ default_configurations = create_hybrid_configuration(
         new_configuration_name = "RSoXS_Upstream",
         configurations_dictionary = default_configurations, 
         configurations_to_combine = [
+                "FOESlits_HighFlux",
                 "SlitC_Retracted",
                 "RSoXSSlits_Centers",
                 "RSoXSSlits_ApertureSizes_SolidSamples",
@@ -554,31 +553,62 @@ default_configurations["RSoXS_Upstream_Liquids"].extend(
     for item in default_configurations["FastShutter"]
     )
 
-default_configurations["DM7NEXAFS"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXS_Upstream"]
-]
-default_configurations["DM7NEXAFS"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["Detectors_Retracted"]
-    )
-## Start with all detectors retracted and then bring in the desired detectors
-devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
-for item in default_configurations["DM7NEXAFS"]:
-    if item["motor"] in devices_to_update:
-        item.update(devices_to_update[item["motor"]])
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXSNEXAFS",
+        configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
+        configurations_to_combine = [
+                "RSoXS_Upstream",
+                "detectors_retracted"
+            ],
+        configurations_to_overwrite = [
+                "WAXS_Beamstop",
+            ],
+)
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXS",
+        configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
+        configurations_to_combine = [
+                "RSoXS_Upstream",
+                "detectors_retracted"
+            ],
+        configurations_to_overwrite = [
+                "WAXS_2D",
+            ],
+)
 
 
-
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "DM7NEXAFS",
+        configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
+        configurations_to_combine = [
+                "RSoXS_Upstream",
+                "detectors_retracted"
+            ],
+        configurations_to_overwrite = [
+                "DM7_Photodiode",
+            ],
+)
 default_configurations = create_hybrid_configuration(
         new_configuration_name = "DM7_FluorescenceImage",
         configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
         configurations_to_combine = [
                 "RSoXS_Upstream",
-                "Detectors_Retracted"
+                "detectors_retracted"
             ],
         configurations_to_overwrite = [
                 "DM7_FS13",
+            ],
+)
+## This is just a copy of DM7NEXAFS
+## It is just a dummy configuration to take dark WAXS camera images 
+## PyHyperScattering will throw errors if the configuration does not have "WAXS" in it
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "DM7NEXAFS_WAXS",
+        configurations_dictionary = default_configurations, #copy.deepcopy(default_configurations),
+        configurations_to_combine = [
+                "DM7NEXAFS",
+            ],
+        configurations_to_overwrite = [
             ],
 )
 
@@ -590,7 +620,7 @@ default_configurations["DM7NEXAFS_Liquids"] = [
 ]
 default_configurations["DM7NEXAFS_Liquids"].extend(
     {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["Detectors_Retracted"]
+    for item in default_configurations["detectors_retracted"]
     )
 ## Start with all detectors retracted and then bring in the desired detectors
 devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
@@ -598,88 +628,6 @@ for item in default_configurations["DM7NEXAFS_Liquids"]:
     if item["motor"] in devices_to_update:
         item.update(devices_to_update[item["motor"]])
 
-
-
-
-
-
-
-
-
-
-default_configurations["RSoXS_Upstream_Liquids_Summer2024"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["SlitC_Retracted"]
-]
-default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["RSoXSSlits_Centers"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["RSoXSSlits_ApertureSizes_LiquidSamples_Summer2024"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["DMRSoXS_Mesh"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_Summer2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["FastShutter"]
-    )
-
-default_configurations["DM7NEXAFS_Liquids_Summer2024"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXS_Upstream_Liquids_Summer2024"]
-]
-default_configurations["DM7NEXAFS_Liquids_Summer2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["Detectors_Retracted"]
-    )
-## Start with all detectors retracted and then bring in the desired detectors
-devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
-for item in default_configurations["DM7NEXAFS_Liquids_Summer2024"]:
-    if item["motor"] in devices_to_update:
-        item.update(devices_to_update[item["motor"]])
-
-
-
-
-
-default_configurations["RSoXS_Upstream_Liquids_December2024"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["SlitC_Retracted"]
-]
-default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["RSoXSSlits_Centers"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"])}
-    for item in default_configurations["RSoXSSlits_ApertureSizes_LiquidSamples_December2024"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["DMRSoXS_Mesh"]
-    )
-default_configurations["RSoXS_Upstream_Liquids_December2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["FastShutter"]
-    )
-
-default_configurations["DM7NEXAFS_Liquids_December2024"] = [
-    {"motor": item["motor"], "position": item["position"], "order": item["order"]}
-    for item in default_configurations["RSoXS_Upstream_Liquids_December2024"]
-]
-default_configurations["DM7NEXAFS_Liquids_December2024"].extend(
-    {"motor": item["motor"], "position": item["position"], "order": int(item["order"] + 1)}
-    for item in default_configurations["Detectors_Retracted"]
-    )
-## Start with all detectors retracted and then bring in the desired detectors
-devices_to_update = {item["motor"]: item for item in default_configurations["DM7_Photodiode"]}
-for item in default_configurations["DM7NEXAFS_Liquids_December2024"]:
-    if item["motor"] in devices_to_update:
-        item.update(devices_to_update[item["motor"]])
 
 
 
@@ -709,7 +657,7 @@ default_configurations = create_hybrid_configuration(
         configurations_dictionary = default_configurations, 
         configurations_to_combine = [
                 "RSoXS_Upstream_BroadbandReflectivity",
-                "Detectors_Retracted"
+                "detectors_retracted"
             ],
         configurations_to_overwrite = [
                 "DM7_Photodiode",
@@ -720,10 +668,74 @@ default_configurations = create_hybrid_configuration(
         configurations_dictionary = default_configurations, 
         configurations_to_combine = [
                 "RSoXS_Upstream_BroadbandReflectivity",
-                "Detectors_Retracted"
+                "detectors_retracted"
             ],
         configurations_to_overwrite = [
                 "DM7_FS13",
+            ],
+)
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXS_BroadbandReflectivity",
+        configurations_dictionary = default_configurations, 
+        configurations_to_combine = [
+                "FOESlits_Attenuated",
+                "SlitC_Retracted",
+                "RSoXSSlits_Centers",
+                "RSoXSSlits_ApertureSizes_BroadbandReflectivity",
+                "DMRSoXS_Retracted",
+                "FastShutter",
+                "WAXS_DirectBeam",
+            ],
+        configurations_to_overwrite = [
+                
+            ],
+)
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXS_BroadbandReflectivity_withI0Mesh",
+        configurations_dictionary = default_configurations, 
+        configurations_to_combine = [
+                "FOESlits_Attenuated",
+                "SlitC_Retracted",
+                "RSoXSSlits_Centers",
+                "RSoXSSlits_ApertureSizes_BroadbandReflectivity",
+                "DMRSoXS_Mesh",
+                "FastShutter",
+                "WAXS_DirectBeam",
+            ],
+        configurations_to_overwrite = [
+                
+            ],
+)
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXS_LowFluxNEXAFS",
+        configurations_dictionary = default_configurations, 
+        configurations_to_combine = [
+                "FOESlits_Attenuated",
+                "SlitC_Retracted",
+                "RSoXSSlits_Centers",
+                "RSoXSSlits_ApertureSizes_SolidSamples",
+                "DMRSoXS_Retracted",
+                "FastShutter",
+                "WAXS_DirectBeam",
+            ],
+        configurations_to_overwrite = [
+                
+            ],
+)
+default_configurations = create_hybrid_configuration(
+        new_configuration_name = "WAXS_LowFluxNEXAFS_withI0Mesh",
+        configurations_dictionary = default_configurations, 
+        configurations_to_combine = [
+                "FOESlits_Attenuated",
+                "SlitC_Retracted",
+                "RSoXSSlits_Centers",
+                "RSoXSSlits_ApertureSizes_SolidSamples",
+                "DMRSoXS_Mesh",
+                "FastShutter",
+                "WAXS_DirectBeam",
+            ],
+        configurations_to_overwrite = [
+                
             ],
 )
 

@@ -11,7 +11,6 @@ import httpx
 from bluesky.preprocessors import finalize_decorator
 from bluesky.run_engine import Msg
 import bluesky.plan_stubs as bps
-#from nbs_bl.run_engine import create_run_engine
 from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.printing import run_report
 from nbs_bl.help import print_builtins
@@ -21,21 +20,45 @@ from nbs_bl.plans.xas import *
 from nbs_bl.samples import *
 from rsoxs.redis_config import rsoxs_config
 
+from rsoxs.devices.cameras import configure_cameras
+from rsoxs.plans.rsoxs import *
+from rsoxs.plans.run_acquisitions import *
+from rsoxs.plans.custom_acquisitions_commissioning import *
+from rsoxs.plans.custom_acquisitions_liquids import *
+from rsoxs.plans.custom_acquisitions_broadband import *
+from rsoxs.configuration_setup.configuration_load_save import *
+from rsoxs.configuration_setup.configurations_instrument import *
+from rsoxs.alignment.fiducials import *
+from rsoxs.alignment.energy_calibration import *
+from rsoxs.alignment.m3 import *
 
-# from databroker import Broker
+## Eliot's old code
+from rsoxs.HW.cameras import * ## 20250131 - temporary solution to using crosshairs, need a better long-term solution
+from rsoxs.Functions.alignment import *
+from rsoxs.Functions.alignment_local import *
+from rsoxs.Functions.magics import *
+from rsoxs.HW.contingencies import *
+
 
 run_report(__file__)
 
-try:
-    from bluesky_queueserver import is_re_worker_active
-except ImportError:
-    # TODO: delete this when 'bluesky_queueserver' is distributed as part of collection environment
-    def is_re_worker_active():
-        return False
+from bluesky_queueserver import is_re_worker_active
 
-
-# RE = create_run_engine(setup=True)
 RE = bl.run_engine
+
+async def skinnyunstage(msg):
+    """
+    Generic command handler for all commands
+    """
+    command, obj, args, kwargs, _ = msg
+    ret = obj.skinnyunstage()
+
+async def skinnystage(msg):
+    command, obj, args, kwargs, _ = msg
+    ret = obj.skinnystage()
+
+RE.register_command("skinnystage", skinnystage)
+RE.register_command("skinnyunstage", skinnyunstage)
 
 if not is_re_worker_active():
     ns = get_ipython().user_ns
@@ -43,30 +66,14 @@ else:
     ns = {}
 if not is_re_worker_active():
     get_ipython().log.setLevel("ERROR")
-# db = Broker.named("rsoxs")  ## This can access scan information from Tiled (?)
-# db is defined manually so that configure_base
-# is not called multiple times when starting up
-# Bluesky on the beamline computer.
+
 sd = bl.supplemental_data
-# bec = ns["bec"]
 
-"""redis_md_settings = bl.settings.get("redis").get("md")
-
-mdredis = redis.Redis(
-    redis_md_settings.get("host", "info.sst.nsls2.bnl.gov"),
-    port=redis_md_settings.get("port", 6379),
-    db=redis_md_settings.get("db", 0),
-)"""
-# RE.md = RedisStatusDict(mdredis, prefix=redis_md_settings.get("prefix", ""))
-# RE.md = bl.md
 md = RE.md  ## The contents from md are added into the start document for the scan metadata in Tiled.
-# GLOBAL_USER_STATUS.add_status("USER_MD", RE.md)
-
-
 
 data_session_re = re.compile(r"^pass-(?P<proposal_number>\d+)$")
 
-
+'''
 def md_validator(md):
     """Validate RE.md before a plan runs.
 
@@ -133,6 +140,7 @@ def md_validator(md):
 
 # md_validator will be called before a plan runs
 RE.md_validator = md_validator
+'''
 
 # Optional: set any metadata that rarely changes.
 RE.md["beamline_id"] = "SST-1 RSoXS"

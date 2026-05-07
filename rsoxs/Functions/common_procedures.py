@@ -49,9 +49,10 @@ from ..HW.detectors import set_exposure
 # from ..startup import bec
 from nbs_bl.printing import run_report
 from nbs_bl.gGrEqns import get_mirror_grating_angles, find_best_offsets
+
+## TODO: Migrate to Jamie's fly_max.  Check that parameters are the same.
+## After that, can delete entire fly_alignment.py file that's in Functions
 from .fly_alignment import fly_max
-from .energyscancore import cdsaxs_scan
-from .rsoxs_plans import do_rsoxs
 
 run_report(__file__)
 
@@ -121,6 +122,8 @@ def buildeputable(
             flip = False
         
         yield from bps.mv(mono_en, energy,en.scanlock, False,epu_gap,startgap)
+        
+        ## Below is Eliot's old fly_max
         yield from fly_max(
             [izero_mesh, beamstop_waxs],
             [
@@ -137,6 +140,7 @@ def buildeputable(
             peaklist,
             end_on_max=False
         )
+
         startinggap = peaklist[-1]["RSoXS Au Mesh Current"]["en_epugap"]
         gapbs = peaklist[-1]["WAXS Beamstop"]["en_epugap"]
         height = peaklist[-1]["RSoXS Au Mesh Current"]["RSoXS Au Mesh Current"]
@@ -596,35 +600,6 @@ def reset_amps():
 
 #[200,250,270,280,282,283,284,285,286,287,288,500,535,800]
 
-def do_cdsaxs(energies, samples):
-    
-    waxs_det = bl["waxs_det"]
-    
-    ## If a reduction in X-ray dose is needed, then adjust the slitsc aperture size and not the exposure time.  The 9 s exposure time is necessary to ensure X-ray exposure is delivered at all angles.
-    yield from bps.mv(slitsc,-1.05) # big flux
-    for samp in samples:
-        yield from load_samp(samp)
-        for energy in energies:
-            yield from bps.mv(en,energy)
-            yield from cdsaxs_scan(angle_mot=sam_Th,det=waxs_det,start_angle=-57,end_angle=-80,exp_time=9,md={'plan_name':f'CD_high_{energy}'})
-    yield from bps.mv(slitsc,-0.05) # mid flux
-    for samp in samples:
-        yield from load_samp(samp)
-        for energy in energies:
-            yield from bps.mv(en,energy)
-            yield from cdsaxs_scan(angle_mot=sam_Th,det=waxs_det,start_angle=-57,end_angle=-80,exp_time=9,md={'plan_name':f'CD_mid1_{energy}'})
-            yield from cdsaxs_scan(angle_mot=sam_Th,det=waxs_det,start_angle=-65,end_angle=-88,exp_time=9,md={'plan_name':f'CD_mid2_{energy}'})
-    yield from bps.mv(slitsc,-0.01) # least flux
-    for samp in samples:
-        yield from load_samp(samp)
-        for energy in energies:
-            yield from bps.mv(en,energy)
-            yield from cdsaxs_scan(angle_mot=sam_Th,det=waxs_det,start_angle=-65,end_angle=-88,exp_time=9,md={'plan_name':f'CD_low_{energy}'})
-    yield from bps.mv(slitsc,-3.05) # all flux
-    for samp in samples:
-        yield from load_samp(samp)
-        yield from bps.mv(sam_Th,-70)
-        yield from do_rsoxs(edge=energies,frames=1,exposure=.1,md={'plan_name':f'CD_20deg'})
 
 
 def ramp_temp_test(temp,ramp_rate,interval,energies,pols,name):

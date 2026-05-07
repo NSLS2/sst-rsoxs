@@ -19,7 +19,22 @@ from ..Functions.alignment import (
 
 
 ## For now, mostly pasting Eliot's fly_find-fiducials, but updating the fly_max function that is used for testing purposes
-def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5, y2=2):
+def find_fiducials(
+        f2=[3.5, -1, -2.4, 1.5], 
+        f1=[2.0, -0.9, -1.5, 0.8], 
+        y1=-187.5, 
+        y2=2,
+        configuration = "WAXSNEXAFS",
+        ):
+    
+    ## TODO: make more robust and automated
+    if configuration == "WAXSNEXAFS":
+        detector = beamstop_waxs
+        detector_name = "WAXS Beamstop"
+    if configuration == "DM7NEXAFS":
+        detector = dm7_photodiode
+        detector_name = "DM7 photodiode"
+
     thoffset = 0
     angles = [-90 + thoffset, 0 + thoffset, 90 + thoffset, 180 + thoffset]
     xrange = 3.5
@@ -29,8 +44,8 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
     ## January 2026 - No WAXS beamstop
     #yield from load_configuration("WAXSNEXAFS") ## Don't want to harm camera while rotating sample bar
     #beamstop_waxs.kind = "hinted"
-    yield from load_configuration("DM7NEXAFS")
-    dm7_photodiode.kind = "hinted"
+    yield from load_configuration(configuration)
+    detector.kind = "hinted"
     # bec.enable_plots()
     startys = [y2, y1]  # af2 first because it is a safer location
     maxlocs = []
@@ -38,7 +53,7 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
         yield from bps.mv(sam_Y, starty, sam_X, startxs[1], sam_Th, 0, sam_Z, 0)
         peaklist = []
         yield from rsoxs_fly_max(
-            [dm7_photodiode], #[beamstop_waxs],
+            [detector], #[beamstop_waxs],
             sam_Y,
             starty - 1,
             starty + 1,
@@ -48,14 +63,14 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
             peaklist=peaklist,
             stream=False,
         )
-        maxlocs.append(peaklist[-1]["DM7 photodiode"][sam_Y.name]) #maxlocs.append(peaklist[-1]["WAXS Beamstop"][sam_Y.name])
-        yield from bps.mv(sam_Y, peaklist[-1]["DM7 photodiode"][sam_Y.name]) #yield from bps.mv(sam_Y, peaklist[-1]["WAXS Beamstop"][sam_Y.name])
+        maxlocs.append(peaklist[-1][detector_name][sam_Y.name]) #maxlocs.append(peaklist[-1]["WAXS Beamstop"][sam_Y.name])
+        yield from bps.mv(sam_Y, peaklist[-1][detector_name][sam_Y.name]) #yield from bps.mv(sam_Y, peaklist[-1]["WAXS Beamstop"][sam_Y.name])
         for startx, angle in zip(startxs, angles):
             yield from bps.mv(sam_X, startx, sam_Th, angle)
             yield from bps.mv(shutter_control, 1)
             peaklist = []
             yield from rsoxs_fly_max(
-                [dm7_photodiode], #[beamstop_waxs],
+                [detector], #[beamstop_waxs],
                 sam_X,
                 startx - 0.5 * xrange,
                 startx + 0.5 * xrange,
@@ -64,7 +79,7 @@ def find_fiducials(f2=[3.5, -1, -2.4, 1.5], f1=[2.0, -0.9, -1.5, 0.8], y1=-187.5
                 open_shutter=True,
                 peaklist=peaklist,
             )
-            maxlocs.append(peaklist[-1]["DM7 photodiode"][sam_X.name]) #maxlocs.append(peaklist[-1]["WAXS Beamstop"][sam_X.name])
+            maxlocs.append(peaklist[-1][detector_name][sam_X.name]) #maxlocs.append(peaklist[-1]["WAXS Beamstop"][sam_X.name])
     
     
     print(maxlocs)  # [af2y,af2xm90,af2x0,af2x90,af2x180,af1y,af1xm90,af1x0,af1x90,af1x180]

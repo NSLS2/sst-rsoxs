@@ -26,7 +26,7 @@ from nbs_bl.hw import (
     sam_Y,
     sam_Th,
     #waxs_det,
-    #Det_W,
+    Det_W,
     fs13_cam,
     dm7_y,
 )
@@ -41,7 +41,182 @@ from rsoxs.Functions.alignment import (
 from rsoxs.HW.energy import set_polarization
 from ..alignment.m3 import *
 from ..alignment.energy_calibration import *
+from .run_acquisitions import run_acquisitions_single
 
+
+
+
+
+
+
+def night_20260328():
+    """
+    """
+
+    ## Low flux NEXAFS with broadband beam
+    ## TODO: if intensities are too low, use repeat exposures
+    print("Starting low flux NEXAFS scans with broadband beam")
+    template_acquisition = {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": "WAXS_BroadbandReflectivity",
+    "scan_type": "rsoxs",
+    "energy_list_parameters": "carbon_NEXAFS",
+    "polarizations": [90], 
+    "cycles": 1,
+    "group_name": "Low flux NEXAFS with broadband beam",
+    "priority": 1,
+    }
+    queue = []
+    for sample_id in [
+        "OpenBeam", 
+        "SiN_Blank", 
+        "50nmPS", 
+        "25nmPS",
+        "OpenBeam", 
+        "SiN_Blank",
+        ]:
+        acquisition = copy.deepcopy(template_acquisition)
+        acquisition["sample_id"] = sample_id
+        queue.append(acquisition)
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+    print("With I0 mesh")
+    for acquisition in queue:
+        acquisition["configuration_instrument"] = "WAXS_BroadbandReflectivity_withI0Mesh"
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+
+
+    ## Low flux NEXAFS with monochromatic beam
+    ## TODO: if intensities are too low, use repeat exposures
+    print("Starting low flux NEXAFS scans with monochromatic beam")
+    template_acquisition = {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": "WAXS_LowFluxNEXAFS",
+    "scan_type": "rsoxs",
+    "energy_list_parameters": "carbon_NEXAFS",
+    "polarizations": [90], 
+    "cycles": 1,
+    "group_name": "Low flux NEXAFS with monochromatic beam",
+    "priority": 1,
+    }
+    queue = []
+    for sample_id in [
+        "OpenBeam", 
+        "SiN_Blank", 
+        "50nmPS", 
+        "25nmPS",
+        "OpenBeam", 
+        "SiN_Blank",
+        ]:
+        acquisition = copy.deepcopy(template_acquisition)
+        acquisition["sample_id"] = sample_id
+        queue.append(acquisition)
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+    print("With I0 mesh")
+    for acquisition in queue:
+        acquisition["configuration_instrument"] = "WAXS_LowFluxNEXAFS_withI0Mesh"
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+
+
+    ## Spirals
+    print("Starting spirals with monochromatic beam")
+    template_acquisition = {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": "WAXS_LowFluxNEXAFS",
+    "scan_type": "spiral",
+    "energy_list_parameters": 270,
+    "polarizations": [90], 
+    "spiral_dimensions": [0.2, 3, 3],
+    "group_name": "Spirals with monochromatic beam",
+    "priority": 1,
+    }
+    queue = []
+    for sample_id in [
+        "SiN_Blank", 
+        "50nmPS", 
+        "25nmPS",
+        ]:
+        acquisition = copy.deepcopy(template_acquisition)
+        acquisition["sample_id"] = sample_id
+        queue.append(acquisition)
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+
+
+    
+    
+    ## End in safe configuration
+    yield from load_configuration("DM7NEXAFS")
+    yield from load_samp("OpenBeam")
+
+
+
+
+
+def night_20260327():
+    """
+    """
+
+    ## Standard NEXAFS
+    print("Starting NEXAFS scans")
+    template_acquisition = {
+    "sample_id": "OpenBeam",
+    "configuration_instrument": "DM7NEXAFS",
+    "scan_type": "nexafs",
+    "energy_list_parameters": "carbon_NEXAFS",
+    "polarizations": [90], 
+    "cycles": 1,
+    "group_name": "Standard NEXAFS",
+    "priority": 1,
+    }
+    queue = []
+    for sample_id in [
+        "OpenBeam", 
+        "SiN_Blank", 
+        "50nmPS", 
+        "25nmPS",
+        "PS_TEY",
+        "HOPG",
+        "OpenBeam", 
+        "SiN_Blank",
+        ]:
+        acquisition = copy.deepcopy(template_acquisition)
+        acquisition["sample_id"] = sample_id
+        if sample_id == "PS_TEY" or sample_id == "HOPG":
+            acquisition["sample_angles"] = [20]
+        queue.append(acquisition)
+    for acq in queue:
+        yield from run_acquisitions_single(acquisition=acq, dryrun=False)
+    
+
+
+    ## Find q range across different detector positions
+    ## Does moving the detector out actually give larger q?
+    print("Starting WAXS camera offset scans")
+    yield from load_configuration("WAXS") 
+    ## Load SBA-15 sample.  This sample will stay in the same position throughout all scans.
+    yield from load_samp("SBA15")
+    ## Iterate through different WAXS camera positions
+    ## The WAXS camera comes in diagonally, so it would move both to the side and further from the sample.
+    for waxs_detector_position in np.arange(2, -94, -8):
+        yield from bps.mv(Det_W, waxs_detector_position)
+        energy_parameters = (100, 100, 200, 91.65, 291.65, 8.35, 300, 100, 1300)
+        yield from nbs_energy_scan(
+                            *energy_parameters,
+                            use_2d_detector=True, 
+                            dwell=0.1,
+                            n_exposures=1, 
+                            )
+    
+    ## End in safe configuration
+    yield from load_configuration("DM7NEXAFS")
+    yield from load_samp("OpenBeam")
+        
+    
+    ## Spiral scans
 
 
 

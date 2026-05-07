@@ -30,13 +30,12 @@ from ..HW.detectors import (
 )
 from nbs_bl.plans.scans import nbs_count
 #from ..Functions.alignment import sample
-from ..startup import RE
 from ..HW.energy import set_polarization
 from nbs_bl.printing import run_report, boxed_text
 
 
 run_report(__file__)
-
+RE = bl.run_engine
 
 @register_line_magic
 def x(line):

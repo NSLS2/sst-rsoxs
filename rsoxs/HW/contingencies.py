@@ -41,7 +41,8 @@ from ..HW.detectors import (
     dark_frame_preprocessor_waxs,
     # dark_frame_preprocessor_saxs,
 )
-from ..startup import RE
+
+RE = bl.run_engine
 
 
 run_report(__file__)

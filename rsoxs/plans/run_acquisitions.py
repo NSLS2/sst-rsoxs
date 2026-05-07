@@ -11,12 +11,9 @@ from rsoxs.Functions.alignment import (
     )
 from rsoxs.HW.energy import set_polarization
 from nbs_bl.plans.scans import nbs_count, nbs_list_scan, nbs_energy_scan
-from ..Functions.energyscancore import cdsaxs_scan
-from ..Functions.rsoxs_plans import do_rsoxs
 from rsoxs.plans.rsoxs import spiral_scan
 from .default_energy_parameters import energy_list_parameters
-from rsoxs.HW.detectors import snapshot
-from ..startup import rsoxs_config
+from ..redis_config import rsoxs_config
 from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from nbs_bl.hw import (
     en,
@@ -50,7 +47,7 @@ from nbs_bl.samples import add_current_position_as_sample
 
 
 def run_acquisitions_queue(
-        configuration = copy.deepcopy(rsoxs_config["bar"]),
+        configuration = copy.deepcopy(rsoxs_config.get("bar", {})),
         dryrun = True,
         sort_by = ["priority"], ## TODO: Not sure yet how to give it a list of groups in a particular order.  Maybe a list within a list.
         ):
@@ -111,7 +108,7 @@ def run_acquisitions_single(
         yield from load_samp(
             sample_id_or_index = acquisition[parameter], 
             dryrun = dryrun,
-            ) ## TODO: what is the difference between load_sample (loads from dict) and load_samp(loads from id or number)?  Can they be consolidated?
+            ) 
         
 
     ## TODO: set temperature if needed, but this is lowest priority
