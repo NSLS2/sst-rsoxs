@@ -37,4 +37,10 @@ for detector in bl.all_standard_pros.devices.values():
         camera_name = detector.tiff.camera_name
         create_proposal_directory(camera_name)
 
+waxs_det = bl["waxs_det"]
+waxs_det.cam.temperature_actual.set(-80)
+# Open the shutter
+shutter_control = bl["shutter_control"]
+shutter_control.set(1)
+
 turn_off_checks()
