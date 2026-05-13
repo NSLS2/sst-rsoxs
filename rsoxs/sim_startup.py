@@ -39,8 +39,12 @@ for detector in bl.all_standard_pros.devices.values():
 
 waxs_det = bl["waxs_det"]
 waxs_det.cam.temperature_actual.set(-80)
-# Open the shutter
-shutter_control = bl["shutter_control"]
-shutter_control.set(1)
+waxs_det.cam.shutter_mode.set(1)
 
+from ophyd._pyepics_shim import caput
+
+caput("XF:07ID1-ES:1{GE:2}cam1:ShutterCloseEPICS.OUT$", "XF:07IDB-CT{DIODE-Local:1}OutPt01:Data-Sel CP")
+caput("XF:07ID1-ES:1{GE:2}cam1:ShutterOpenEPICS.OUT$", "XF:07IDB-CT{DIODE-Local:1}OutPt01:Data-Sel CP")
+caput("XF:07ID1-ES:1{GE:2}cam1:ShutterCloseEPICS.OVAL", 0)
+caput("XF:07ID1-ES:1{GE:2}cam1:ShutterOpenEPICS.OVAL$", 1)
 turn_off_checks()
