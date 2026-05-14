@@ -37,10 +37,18 @@ for detector in bl.all_standard_pros.devices.values():
         camera_name = detector.tiff.camera_name
         create_proposal_directory(camera_name)
 
-waxs_det = bl["waxs_det"]
-waxs_det.cam.temperature_actual.set(-80)
-# Open the shutter
-shutter_control = bl["shutter_control"]
-shutter_control.set(1)
 
+try: 
+    ## TODO: Should this be in .devices.waxs_det_setup?
+    ## But it is only for simulations?
+    waxs_det = bl["waxs_det"]
+    waxs_det.cam.temperature_actual.set(-80)
+    # Open the shutter
+    shutter_control = bl["shutter_control"]
+    shutter_control.set(1)
+except KeyError:
+    pass
+
+
+## This is a workaround to allow simulation to work.  Not for real beamline operation.
 turn_off_checks()

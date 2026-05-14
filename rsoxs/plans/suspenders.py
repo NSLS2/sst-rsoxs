@@ -23,9 +23,13 @@ from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from ..HW.detectors import (
     start_det_cooling,
     stop_det_cooling,
+    
+)
+from ..devices.waxs_det_setup import(
     dark_frame_preprocessor_waxs_spirals,
     dark_frame_preprocessor_waxs,
     # dark_frame_preprocessor_saxs,
+    waxs_back_on,
 )
 
 RE = bl.run_engine
@@ -40,13 +44,7 @@ def turn_off_checks():
     for key in suspender_selection:
         suspender_selection[key] = False
 
-def waxs_back_on():
-   
-   waxs_det = bl["waxs_det"]
-   
-   yield from bps.mv(
-       waxs_det.cam.temperature, -80, waxs_det.cam.enable_cooling, 1, waxs_det.cam.bin_x, 4, waxs_det.cam.bin_y, 4
-   )
+
 
 
 def create_waxs_suspenders():

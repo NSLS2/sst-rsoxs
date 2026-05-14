@@ -13,7 +13,7 @@ from nbs_bl.hw import (
     sam_Th, 
     sam_X, 
     sam_Y, 
-    waxs_det,
+    #waxs_det,
 )
 from nbs_bl.plans.scans import nbs_count
 from nbs_bl.printing import boxed_text, run_report
@@ -32,27 +32,13 @@ run_report(__file__)
 # saxs_det.cam.ensure_nonblocking()
 # saxs_det.setup_cam()
 # #
-"""
-waxs_det = RSOXSGreatEyesDetector(
-   "XF:07ID1-ES:1{GE:2}",
-   name="Wide Angle CCD Detector",
-   read_attrs=['tiff', 'stats1.total', 'saturated','under_exposed','cam'],
-)
-
-waxs_det.cam.read_attrs = ["acquire_time"]
-waxs_det.transform_type = 1
-waxs_det.cam.ensure_nonblocking()
-waxs_det.setup_cam()
-
-# saxs_det.stats1.name = "SAXS fullframe"
-waxs_det.stats1.name = "WAXS fullframe"
-"""
 
 # to simulate, use this line, and comment out the relevent detector above
 # saxs_det = SimGreatEyes(name="Simulated SAXS camera")
 
 ## TODO: the stop_det_cooling, start_det_cooling, set_exposure, and exposure functions probably can be removed, as they are in devices/detectors.py in the RSoXSGreatEyesDetector class.
 ## Once the camera is fully working, try commenting these out and testing.
+## Actually, start_det_cooling and stop_det_cooling are used in Jamie's new suspenders, so maybe they should be kept.  Understand why we use these instead of the functions in the RSoXSGreatEyesDetector class.
 
 def stop_det_cooling():
     # yield from saxs_det.cooling_off()
@@ -85,8 +71,10 @@ def exposure():
     return "   " + waxs_det.exposure()  # + "\n   " + waxs_det.exposure()
 
 
+"""
+## Moved to plans.snapshot.  TODO: Delete once tested.
 def snapshot(secs=0, count=1, name=None, energy=None, detn="waxs", n_exp=1):
-    """
+    
     Takes one or more images.
     Also useful to clear out any charge accumulated in the detector.
     
@@ -96,7 +84,7 @@ def snapshot(secs=0, count=1, name=None, energy=None, detn="waxs", n_exp=1):
     
     TODO: remove name and energy after verifying that they are not used elsewhere.  They are not used in snapwaxs.
     
-    """
+    
     waxs_det = bl["waxs_det"]
 
     cameras_lookup = {"waxs": waxs_det} ## Used to have SAXS camera as well
@@ -122,13 +110,14 @@ def snapshot(secs=0, count=1, name=None, energy=None, detn="waxs", n_exp=1):
                          dwell = secs,
                          n_exposures = n_exp,
     )
-
+"""
 
 # adding for testing
 
 count = bp.count
 
-
+"""
+## TODO:  Delete once done testing
 def dark_plan(det):
     #yield from det.skinnyunstage()
     yield from skinnyunstage(det)
@@ -217,9 +206,11 @@ dark_frame_preprocessor_waxs_spirals = bluesky_darkframes.DarkFramePreprocessor(
     limit=10,
 )
 
+"""
+
 
 ## TODO: It doesn't seem like this is used elsewhere in the code, so test, delete, and/or consolidate more meaningfully elsewhere.
-dark_frames_enable_waxs = make_decorator(dark_frame_preprocessor_waxs)()
+#dark_frames_enable_waxs = make_decorator(dark_frame_preprocessor_waxs)()
 # dark_frames_enable_saxs = make_decorator(dark_frame_preprocessor_saxs)()
 
 
