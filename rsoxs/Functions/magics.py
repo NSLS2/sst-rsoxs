@@ -25,9 +25,10 @@ from nbs_bl.beamline import GLOBAL_BEAMLINE as bl
 from ..HW.detectors import (
     set_exposure,
     #waxs_det,
-    snapshot,
+    #snapshot,
     exposure,
 )
+from ..plans.snapshot import snapshot
 from nbs_bl.plans.scans import nbs_count
 #from ..Functions.alignment import sample
 from ..HW.energy import set_polarization

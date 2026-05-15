@@ -27,7 +27,7 @@ from nbs_bl.hw import (
     gvll, 
     gv27a,
     sam_X,
-    waxs_det,
+    #waxs_det,
     mc19_fault, 
     mc20_fault, 
     mc21_fault,
@@ -37,10 +37,13 @@ from nbs_bl.hw import (
 from ..HW.detectors import (
     start_det_cooling,
     stop_det_cooling,
-    dark_frame_preprocessor_waxs_spirals,
-    dark_frame_preprocessor_waxs,
-    # dark_frame_preprocessor_saxs,
+    
 )
+## Won't import in case waxs_det is turned off
+try:
+    from ..devices.waxs_det_setup import suspend_waxs_temp_low, suspend_waxs_temp_high
+except ImportError:
+    pass
 
 RE = bl.run_engine
 
@@ -48,6 +51,8 @@ RE = bl.run_engine
 run_report(__file__)
 
 
+"""
+## Moved to ..devices.waxs_det_setup.  TODO: Delete from here once tested.
 def waxs_back_on():
    
    waxs_det = bl["waxs_det"]
@@ -61,49 +66,6 @@ def waxs_back_on():
     # yield from bps.mv(
         # saxs_det.cam.temperature, -80, saxs_det.cam.enable_cooling, 1, saxs_det.cam.bin_x, 4, saxs_det.cam.bin_y, 4
     # )
-
-
-suspend_gvll = SuspendBoolLow(
-    gvll.state,
-    sleep=30,
-    tripped_message="Gate valve to load lock is closed, waiting for it to open",
-)
-
-suspend_shutter4 = SuspendBoolHigh(
-    psh4.state,
-    sleep=30,
-    tripped_message="Shutter 4 Closed, waiting for it to open",
-    pre_plan=beamdown_notice,
-    post_plan=beamup_notice,
-)
-
-suspend_shutter1 = SuspendBoolHigh(
-    fesh.state,
-    sleep=30,
-    tripped_message="Front End Shutter Closed, waiting for it to open",
-    pre_plan=beamdown_notice,
-    post_plan=beamup_notice,
-)
-
-suspend_gate_valve = SuspendBoolLow(
-    gv27a.state,
-    sleep=1,
-    tripped_message="Gate valve is closed, pressure is probably bad. waiting for it to open.",
-    pre_plan=beamdown_notice,
-    post_plan=beamup_notice,
-)
-
-
-
-suspend_current = SuspendFloor(
-    ring_current.target,
-    resume_thresh=350,
-    suspend_thresh=250,
-    sleep=30,
-    tripped_message="Beam Current is below threshold, will resume when above 350 mA",
-    pre_plan=beamdown_notice,
-    post_plan=beamup_notice,
-)
 
 
 suspend_waxs_temp_low = SuspendFloor(
@@ -154,6 +116,53 @@ suspend_waxs_temp_high = SuspendCeil(
     # pre_plan=det_down_notice,
     # post_plan=temp_ok_notice,
 # )
+"""
+
+
+
+
+suspend_gvll = SuspendBoolLow(
+    gvll.state,
+    sleep=30,
+    tripped_message="Gate valve to load lock is closed, waiting for it to open",
+)
+
+suspend_shutter4 = SuspendBoolHigh(
+    psh4.state,
+    sleep=30,
+    tripped_message="Shutter 4 Closed, waiting for it to open",
+    pre_plan=beamdown_notice,
+    post_plan=beamup_notice,
+)
+
+suspend_shutter1 = SuspendBoolHigh(
+    fesh.state,
+    sleep=30,
+    tripped_message="Front End Shutter Closed, waiting for it to open",
+    pre_plan=beamdown_notice,
+    post_plan=beamup_notice,
+)
+
+suspend_gate_valve = SuspendBoolLow(
+    gv27a.state,
+    sleep=1,
+    tripped_message="Gate valve is closed, pressure is probably bad. waiting for it to open.",
+    pre_plan=beamdown_notice,
+    post_plan=beamup_notice,
+)
+
+
+
+suspend_current = SuspendFloor(
+    ring_current.target,
+    resume_thresh=350,
+    suspend_thresh=250,
+    sleep=30,
+    tripped_message="Beam Current is below threshold, will resume when above 350 mA",
+    pre_plan=beamdown_notice,
+    post_plan=beamup_notice,
+)
+
 
 
 suspend_pressure = SuspendCeil(
@@ -276,6 +285,19 @@ def turn_off_checks():
     logger.removeHandler(mail_handler)
 
 
+# install handlers for errors and install suspenders
+turn_on_checks()
+
+
+"""
+## Moved to ..devices.waxs_det_setup.  TODO: Delete from here once tested.
+
+from ..devices.waxs_det_setup import(
+    dark_frame_preprocessor_waxs_spirals,
+    dark_frame_preprocessor_waxs,
+    # dark_frame_preprocessor_saxs,
+)
+
 def waxs_spiral_mode():
    try:
        RE.preprocessors.remove(dark_frame_preprocessor_waxs_spirals)
@@ -304,5 +326,6 @@ def waxs_normal_mode():
 waxs_normal_mode()
 
 # RE.preprocessors.append(dark_frame_preprocessor_saxs)
-# install handlers for errors and install suspenders
-turn_on_checks()
+"""
+
+##
